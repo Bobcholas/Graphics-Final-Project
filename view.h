@@ -56,6 +56,7 @@ private:
     float m_angleX, m_angleY, m_zoom;
     QPoint m_prevMousePos;
     std::vector<std::unique_ptr<ParticleManager>> m_particlemanagers;
+    int m_numManagers;
 private slots:
     void tick();
 };

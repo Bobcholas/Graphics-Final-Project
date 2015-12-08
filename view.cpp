@@ -14,7 +14,7 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_textureId(0),
 
 
-  m_angleX(0), m_angleY(0.5f), m_zoom(10.f)
+  m_angleX(0), m_angleY(0.5f), m_zoom(10.f),m_numManagers(0)
 {
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
@@ -157,8 +157,10 @@ void View::updateParticles(){
 **/
 void View::loadTex(int i){
     QImage image=m_particlemanagers.at(i)->getTex();
-    glGenTextures(1,&m_textureId);
-    glBindTexture(GL_TEXTURE_2D,m_textureId);
+    GLuint pmid = m_particlemanagers.at(i)->getTexID();
+    std::cout << pmid <<std::endl;
+    glGenTextures(1,&pmid);
+    glBindTexture(GL_TEXTURE_2D,pmid);
     glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,image.width(),image.height(),0,GL_RGBA,GL_UNSIGNED_BYTE,image.bits());
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);//param?
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -212,10 +214,16 @@ void View::drawParticles(){
     float rotationangle;
     glm::mat4x4 rotationmodel(1.f);
     std::vector<Particle> curparticles;
+    QImage image;
     for(int j = 0;j<m_particlemanagers.size();j++){
         curparticles = m_particlemanagers.at(j)->getParticles();
         squareData(m_particlemanagers.at(j)->getScale());
-        loadTex(j);
+        //bind tex + other methods
+        image = m_particlemanagers.at(j)->getTex();
+        glBindTexture(GL_TEXTURE_2D,m_particlemanagers.at(j)->getTexID());
+        glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,image.width(),image.height(),0,GL_RGBA,GL_UNSIGNED_BYTE,image.bits());
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);//param?
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
         for(int i = 0;i<curparticles.size();i++){
             //glUniform3void createParticleManager(glm::vec3 initialpos, unsigned int maxp);fv(glGetUniformLocation(m_textureProgramID, "particlepos"),1,glm::value_ptr(m_particles.at(i).pos));
             translatemodel = glm::translate(glm::mat4(1.f),curparticles.at(i).pos);
@@ -304,5 +312,10 @@ void View::createParticleManager(glm::vec3 initialpos, unsigned int maxp,float s
     newpm->setSpeed(speed);
     newpm->setFuzziness(fuzziness);
     newpm->setForce(force);
+    newpm->setTexID(m_numManagers);
     m_particlemanagers.push_back(std::move(newpm));
+    GLuint pmid = m_particlemanagers.at(m_numManagers)->getTexID();
+    glGenTextures(1,&pmid);
+    m_numManagers+=1;
+
 }

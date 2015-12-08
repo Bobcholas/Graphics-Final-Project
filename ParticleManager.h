@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"            // glm::vec*, mat*, and basic glm functions
 #include <vector>
 #include <QImage>
+#include "GL/glew.h"
 struct Particle{
     // particle struct containing necessary attributes
     bool active;//determines whether or not particle is active. If active, it should not be draw or modified by update particles()
@@ -33,6 +34,8 @@ public:
     inline void setForce(glm::vec3 newforce){m_force = newforce;}
     inline void setSpeed(float newspeed){m_speed = newspeed;}
     inline void setFuzziness(float newfuzziness){m_fuzziness = newfuzziness;}
+    inline void setTexID(GLuint newid){m_textureId=newid;}
+    inline GLuint getTexID(){return m_textureId;}
 private:
     std::vector<Particle> m_particles;
     unsigned int m_maxParticles;//particle limit
@@ -44,5 +47,6 @@ private:
     glm::vec3 m_force;//force applied on each particle in the scene
     glm::vec3 m_position;//initial position of emitter (and particles)
     QImage m_tex;//path to texmap image
+    GLuint m_textureId;//texid
 };
 #endif // PARTICLEMANAGER_H
