@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>ostrich.jpg</file>
+        <file>particle3.jpg</file>
+    </qresource>
+</RCC>
