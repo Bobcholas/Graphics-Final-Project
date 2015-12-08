@@ -2,5 +2,7 @@
     <qresource prefix="/images">
         <file>ostrich.jpg</file>
         <file>particle3.jpg</file>
+        <file>particle1.bmp</file>
+        <file>particle2.bmp</file>
     </qresource>
 </RCC>

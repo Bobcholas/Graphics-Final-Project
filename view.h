@@ -36,13 +36,13 @@ private:
     void drawParticles();//ie opengl stuffs
     void updateParticleManagers();//updates all existing particle managers
     void paintParticles();
-    void loadTex();
+    void loadTex(int i);
     void squareData(float scale);
     void rebuildMatrices();
     void setInitialPosition(glm::vec3 initialposition);//sets intiial position of particle emitter
     void paintParticlesGL();
     void initializeParticlesGL();
-    void createParticleManager(glm::vec3 initialpos, unsigned int maxp,float scale);
+    void createParticleManager(glm::vec3 initialpos, unsigned int maxp,float scale,std::string texpath,glm::vec3 color, glm::vec3 velocity, float speed,float fuzziness, glm::vec3 force);
     std::unique_ptr<OpenGLShape> m_square;
 
 

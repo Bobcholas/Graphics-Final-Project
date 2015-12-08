@@ -1,5 +1,5 @@
 #include "ParticleManager.h"
-ParticleManager::ParticleManager(unsigned int maxparticles): m_maxParticles(10000),
+ParticleManager::ParticleManager(unsigned int maxparticles,std::string texpath): m_maxParticles(10000),
   m_speed(50.0f/10000.f),
   m_fuzziness(50.0f),
   m_scale(0.3f),
@@ -7,7 +7,14 @@ ParticleManager::ParticleManager(unsigned int maxparticles): m_maxParticles(1000
   m_velocity(glm::vec3(0.0f,0.0001f,0.0f)),
   m_force(glm::vec3(0.f,0.0001f,0.0f)),
   m_position(glm::vec3(0.f))
-{m_maxParticles = maxparticles;m_particles = std::vector<Particle>(m_maxParticles); resetParticles();}
+{
+    m_maxParticles = maxparticles;
+    m_particles = std::vector<Particle>(m_maxParticles);
+    resetParticles();
+    //load texmap
+    QString texname = QString(&texpath[0]);
+    m_tex = QImage(texname);
+}
 ParticleManager::~ParticleManager(){}
 void ParticleManager::resetParticle(int i){
     m_particles.at(i).pos = m_position;//probably am going to need to have some other default position in world space?

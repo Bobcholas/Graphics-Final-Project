@@ -28,8 +28,8 @@ View::View(QWidget *parent) : QGLWidget(parent),
     // The game loop is implemented using a timer
     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
     //m_particles = std::vector<Particle>(m_maxParticles); resetParticles();
-    createParticleManager(glm::vec3(0.f),100,0.5f);
-    createParticleManager(glm::vec3(3.f),1000,0.2f);
+    createParticleManager(glm::vec3(0.f),100,0.5f,":/images/particle1.bmp",glm::vec3(1.0f,0.5f,0.2f),glm::vec3(0.0f,0.0001f,0.0f),(50.0f/10000.f),50.0f,glm::vec3(0.f,0.0001f,0.0f));
+    createParticleManager(glm::vec3(3.f),1000,0.2f,":/images/particle2.bmp",glm::vec3(1.0f,0.5f,0.2f),glm::vec3(0.0f,0.0001f,0.0f),(100.0f/10000.f),25.0f,glm::vec3(0.f,0.0001f,0.0f));
 }
 
 View::~View()
@@ -155,8 +155,8 @@ void View::updateParticles(){
     }
 }
 **/
-void View::loadTex(){
-    QImage image(":/images/particle3.jpg");
+void View::loadTex(int i){
+    QImage image=m_particlemanagers.at(i)->getTex();
     glGenTextures(1,&m_textureId);
     glBindTexture(GL_TEXTURE_2D,m_textureId);
     glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,image.width(),image.height(),0,GL_RGBA,GL_UNSIGNED_BYTE,image.bits());
@@ -215,6 +215,7 @@ void View::drawParticles(){
     for(int j = 0;j<m_particlemanagers.size();j++){
         curparticles = m_particlemanagers.at(j)->getParticles();
         squareData(m_particlemanagers.at(j)->getScale());
+        loadTex(j);
         for(int i = 0;i<curparticles.size();i++){
             //glUniform3void createParticleManager(glm::vec3 initialpos, unsigned int maxp);fv(glGetUniformLocation(m_textureProgramID, "particlepos"),1,glm::value_ptr(m_particles.at(i).pos));
             translatemodel = glm::translate(glm::mat4(1.f),curparticles.at(i).pos);
@@ -257,7 +258,7 @@ void View::initializeParticlesGL()
     m_textureProgramID = ResourceLoader::createShaderProgram(":/shaders/texture.vert", ":/shaders/texture.frag");
 
     //squareData();
-    loadTex();
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE,GL_ONE);
 
@@ -282,9 +283,26 @@ void View::updateParticleManagers(){
         m_particlemanagers.at(i)->updateParticles();
     }
 }
-void View::createParticleManager(glm::vec3 initialpos, unsigned int maxp,float scale){
-    std::unique_ptr<ParticleManager> newpm(new ParticleManager(maxp));
+/**
+ * @brief View::createParticleManager Creates particle manager with different parameters depending on the arguments
+ * @param initialpos: initial position of the particle manager
+ * @param maxp: max particles
+ * @param scale: particle scale.
+ * @param texpath: path to texture map
+ * @param color: color of particles
+ * @param velocity: particle velocity
+ * @param speed: speed of particle simulation
+ * @param fuzziness: randomness of particle orginal direction
+ * @param force: force applied on each particle in the scene
+ */
+void View::createParticleManager(glm::vec3 initialpos, unsigned int maxp,float scale,std::string texpath,glm::vec3 color, glm::vec3 velocity, float speed,float fuzziness, glm::vec3 force){
+    std::unique_ptr<ParticleManager> newpm(new ParticleManager(maxp,texpath));
     newpm->setInitialPosition(initialpos);
     newpm->setScale(scale);
+    newpm->setColor(color);
+    newpm->setVelocity(velocity);
+    newpm->setSpeed(speed);
+    newpm->setFuzziness(fuzziness);
+    newpm->setForce(force);
     m_particlemanagers.push_back(std::move(newpm));
 }
