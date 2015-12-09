@@ -27,3 +27,7 @@ FORMS += mainwindow.ui
 RESOURCES += \
     particlesystem/images/images.qrc \
     particlesystem/shaders/shaders.qrc
+
+OTHER_FILES += \
+    particlesystem/shaders/texture.frag \
+    particlesystem/shaders/texture.vert
