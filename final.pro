@@ -63,3 +63,6 @@ macx {
 DISTFILES += \
     shaders/shader.frag \
     shaders/shader.vert
+OTHER_FILES += \
+    particlesystem/shaders/texture.frag \
+    particlesystem/shaders/texture.vert

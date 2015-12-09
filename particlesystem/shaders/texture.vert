@@ -11,6 +11,16 @@ void main() {
     uv = texCoord;
     //for later, I'm assuming that billboarding will change the line after to the folowing:
     //gl_Position = gl_Position + CameraRight_worldspace * squareVertices.x * m_scale + CameraUp_WorldSpace*squareVertices.y *m_scale?
-    gl_Position = projection * view * model * vec4(position, 1.0);
+    mat4 modelview = view * model;
+    modelview[0][0]=1;
+    modelview[0][1]=0;
+    modelview[0][2]=0;
+    modelview[1][0]=0;
+    modelview[1][1]=1;
+    modelview[1][2]=0;
+    modelview[2][0]=0;
+    modelview[2][1]=0;
+    modelview[2][2]=1;
+    gl_Position = projection * modelview* vec4(position, 1.0);
 
 }
