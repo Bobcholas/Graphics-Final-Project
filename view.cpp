@@ -42,8 +42,6 @@ View::View(QWidget *parent) : QGLWidget(parent),
     // The game loop is implemented using a timer
     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
     //m_particles = std::vector<Particle>(m_maxParticles); resetParticles(); now handled in particle managers
-    createParticleManager(glm::vec3(0.f),100,0.5f,":/images/particle3.jpg",glm::vec3(1.0f,0.5f,0.2f),glm::vec3(0.0f,0.0001f,0.0f),(25.0f/10000.f),50.0f,glm::vec3(0.f,0.001f,0.0f));
-    createParticleManager(glm::vec3(3.f),300,0.1f,":/images/particle2.bmp",glm::vec3(1.0f,0.5f,0.2f),glm::vec3(0.0f,0.0001f,0.0f),(80.0f/100000.f),25.0f,glm::vec3(0.f,0.0001f,0.0f));
 
     primitives[PRIMITIVE_CUBE] = new ShapeCube(1, 1, 1);
     primitives[PRIMITIVE_CONE] = new ShapeCone(1, 1, 1);
@@ -97,17 +95,19 @@ void View::initializeGL()
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
     ResourceLoader::initializeGlew();
     initializeSkyBoxGL();
-    initializeParticlesGL();
 
     m_terrainProgramID = ResourceLoader::createShaderProgram(":/shaders/terrain.vert", ":/shaders/terrain.frag");
     initStatue();
     m_terrain.init();
 
+
+    initializeParticlesGL();
 }
 
 void View::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
     paintSkyBoxGL();
     drawTerrain();
@@ -171,7 +171,7 @@ void View::keyReleaseEvent(QKeyEvent *event)
 }
 
 void View::tick()
-{void createParticleManager(glm::vec3 initialpos, unsigned int maxp);
+{
     // Get the number of seconds since the last tick (variable update rate)
     float seconds = m_time.restart() * 0.001f;
 
@@ -360,6 +360,10 @@ void View::createParticleManager(glm::vec3 initialpos, unsigned int maxp,float s
 
 }
 
+void View::createParticleManagerSimple(glm::vec3 initialpos, glm::vec3 force){
+    createParticleManager(initialpos ,300,0.1f,":/images/particle2.bmp",glm::vec3(1.0f,0.5f,0.2f),glm::vec3(0.0f,0.0001f,0.0f),(80.0f/100000.f),25.0f, force);
+}
+
 void View::initStatue(){
     //whee different shader progs
     ResourceLoader::initializeGlew();
@@ -405,6 +409,16 @@ void View::initStatue(){
         primitives[i]->setT2(detail);
         primitives[i]->setT3(detail);
         primitives[i]->bufferVerts(m_statueShaderProgramID);
+    }
+
+    for (std::vector<Statue*>::const_iterator iter = m_statues.begin();
+         iter != m_statues.end(); iter++){
+        Statue* stat = *iter;
+        for (std::vector<Statue::DoubleVec>::const_iterator iter = stat->getParticles()->begin();
+             iter != stat->getParticles()->end(); iter++){
+            Statue::DoubleVec db = *iter;
+            createParticleManager(glm::vec3(db.point),300,0.1f,":/images/particle2.bmp",glm::vec3(1.0f,0.5f,0.2f),glm::vec3(0.0f,0.0001f,0.0f),(80.0f/100000.f),25.0f,glm::vec3(db.dir));//glm::vec3(0.f,0.0001f,0.0f));
+        }
     }
 }
 
