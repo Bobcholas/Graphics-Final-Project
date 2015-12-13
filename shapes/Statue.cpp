@@ -93,7 +93,7 @@ void Statue::addBody(){
                           glm::vec4(0, -1, 0, 0),
                           glm::vec4(-1, 0, 0, 0)}, legJoints);
 
-        TripleVec starter = limbStarter(TripleVec{scale * glm::vec4(floatRange(-.5f, .5f), .5f, floatRange(-.5f, .5f), 1),
+        TripleVec starter = limbStarter(TripleVec{scale * glm::vec4(floatRange(-.3f, .3f), .5f, floatRange(-.3f, .3f), 1),
                                                   glm::vec4(0, 1, 0, 0),
                                                   glm::vec4(0, 0, 1, 0)});
         addHead(starter.point, starter.dir);
@@ -119,7 +119,7 @@ void Statue::addHead(glm::vec4 point, glm::vec4 up){
         tp.primitive.type = PRIMITIVE_CYLINDER;
         break;
     }
-    tp.primitive.material = m_mat;
+    tp.primitive.material = slightModMat();
     objects.push_back(tp);
 }
 
@@ -130,7 +130,7 @@ void Statue::addLimb(TripleVec tv, int joints){
     {
         TransPrimitive tp = TransPrimitive();
         tp.trans = m_anchor * glm::translate(glm::vec3(tv.point));
-        tp.primitive.material = m_mat;
+        tp.primitive.material = slightModMat();
         switch(0){//intRange(0, 2)){
         case 0:
             tp.primitive.type = PRIMITIVE_SPHERE;
@@ -170,7 +170,7 @@ void Statue::addLimb(TripleVec tv, int joints){
         break;
     }
 
-    tp.primitive.material = m_mat;
+    tp.primitive.material = slightModMat();
     objects.push_back(tp);
 
     if (joints > 0) { //maybe add another branch
@@ -191,12 +191,31 @@ CS123SceneMaterial Statue::randMaterial(){
     gives.blend = 0;
     gives.cAmbient = CS123SceneColor{floatRange(.25, 1), floatRange(.25, 1), floatRange(.25, 1), 1};
     gives.cDiffuse = CS123SceneColor{floatRange(.25, 1), floatRange(.25, 1), floatRange(.25, 1), 1};
-    gives.cDiffuse = CS123SceneColor{floatRange(.25, 1), floatRange(.25, 1), floatRange(.25, 1), 1};
+    gives.cEmissive = CS123SceneColor{floatRange(.25, 1), floatRange(.25, 1), floatRange(.25, 1), 1};
     gives.cReflective = CS123SceneColor{floatRange(.25, 1), floatRange(.25, 1), floatRange(.25, 1), 1};
     gives.cSpecular = CS123SceneColor{floatRange(.25, 1), floatRange(.25, 1), floatRange(.25, 1), 1};
     gives.cTransparent = CS123SceneColor{floatRange(.25, 1), floatRange(.25, 1), floatRange(.25, 1), 1};
     gives.ior = 1;
     gives.shininess = .5;
     gives.textureMap = nullptr;
+    return gives;
+}
+
+CS123SceneMaterial Statue::slightModMat(){
+    CS123SceneMaterial gives = m_mat;
+    std::vector<CS123SceneColor*> toMod;
+    toMod.push_back(&(gives.cAmbient));
+    toMod.push_back(&(gives.cDiffuse));
+    toMod.push_back(&(gives.cEmissive));
+    toMod.push_back(&(gives.cReflective));
+    toMod.push_back(&(gives.cSpecular));
+    toMod.push_back(&(gives.cTransparent));
+    for (std::vector<CS123SceneColor*>::const_iterator iter = toMod.begin();
+         iter != toMod.end(); iter++){
+        CS123SceneColor *curMod = *iter;
+        curMod->r += floatRange(-.1, .1);
+        curMod->g += floatRange(-.1, .1);
+        curMod->b += floatRange(-.1, .1);
+    }
     return gives;
 }

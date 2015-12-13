@@ -40,6 +40,8 @@ private:
     TripleVec limbStarter(TripleVec base);
 
     CS123SceneMaterial randMaterial();
+
+    CS123SceneMaterial slightModMat();
 };
 
 #endif // STATUE_H
