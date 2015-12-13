@@ -74,6 +74,13 @@ float Terrain::getHeight(float x, float y)
     return m_heights[ix(col, row, m_numCols)];
 }
 
+glm::vec3 Terrain::getNormalVec(float x, float y)
+{
+    int row = static_cast<int>((x*m_numCols)/40 + (m_numCols/2));
+    int col = static_cast<int>((y*m_numRows)/40 + (m_numRows/2));
+    return getNormal(row, col);
+}
+
 
 /**
  * Returns the normal vector for the terrain vertex at the given row and column.

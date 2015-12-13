@@ -42,6 +42,8 @@ public:
 
     float getHeight(float x, float y);
 
+    glm::vec3 getNormalVec(float x, float y);
+
 private:
     void initHeights();
 
