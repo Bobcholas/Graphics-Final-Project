@@ -424,7 +424,6 @@ void View::initStatue(){
         glm::mat4 transform = glm::translate(xyz)
                 * glm::scale(glm::vec3(.2, .2, .2))
                 * Statue::rotateTo(glm::vec4(0, 1, 0, 0), glm::vec4(m_terrain.getNormalVec(quote_y_unquote, x), 0))
-                * glm::translate(glm::vec3(0, 2.4, 0))
                 * glm::rotate(static_cast<float>(Statue::floatRange(0, 2) * M_PI), glm::vec3(0, 1, 0));
         Statue *s = new Statue(transform);
         m_statues.push_back(s);

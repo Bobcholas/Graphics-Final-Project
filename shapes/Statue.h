@@ -9,7 +9,7 @@ class Statue
 public:
     Statue();
     ~Statue();
-    Statue(glm::mat4 anchorMatrix);
+    Statue(glm::mat4 anchor);
 
     std::vector<TransPrimitive> * getObjects();
 
@@ -26,8 +26,6 @@ public:
     static int intRange(int lo, int hi);
     static float floatRange(float lo, float hi);
 
-    float getHeight(){return height;}
-
 private:
     struct TripleVec{
         glm::vec4 point; //where object starts
@@ -35,9 +33,7 @@ private:
         glm::vec4 bendMax; //maximum bend direction
     };
 
-    float height;
-
-    void genStatue(glm::mat4 anchorMatrix);
+    void genStatue(glm::mat4 anchor);
 
     CS123SceneMaterial m_mat;
 

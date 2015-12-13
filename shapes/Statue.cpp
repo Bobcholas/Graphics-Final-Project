@@ -6,16 +6,16 @@ Statue::Statue()
     genStatue(glm::mat4());
 }
 
-Statue::Statue(glm::mat4 anchorMatrix)
+Statue::Statue(glm::mat4 anchor)
 {
-    genStatue(anchorMatrix);
+    genStatue(anchor);
 }
 
 Statue::~Statue(){
 }
 
-void Statue::genStatue(glm::mat4 anchorMatrix){
-    m_anchor = anchorMatrix;
+void Statue::genStatue(glm::mat4 anchor){
+    m_anchor = anchor;
     m_mat = randMaterial();
     addBody();
 }
@@ -44,7 +44,7 @@ glm::mat4 Statue::rotateTo(glm::vec4 from, glm::vec4 to){
         to.x += .1; //if not wholly x, this will find a cross product
         cprod = glm::cross(glm::normalize(glm::vec3(from)), glm::normalize(glm::vec3(to)));
         mag = std::asin(glm::length(cprod));
-        if (mag == 0){ //this will find if wholly x
+        if (mag == 0){ //this will find if whollyrix x
             to.y += .1;
             mag = std::asin(glm::length(cprod));
         }
@@ -66,9 +66,10 @@ Statue::TripleVec Statue::limbStarter(TripleVec base){
 }
 
 void Statue::addBody(){
-    glm::mat4 scale = glm::scale(glm::vec3(floatRange(2, 3), floatRange(2, 4), floatRange(1, 2)));
+    glm::vec3 scaleVec = glm::vec3(floatRange(2, 3), floatRange(2, 4), floatRange(1, 2));
+    glm::mat4 scale = glm::scale(scaleVec);
 
-    height = 1.9 + (scale * glm::vec4(0, .5, 0, 1)).y;
+    m_anchor *= glm::translate(glm::vec3(0, 1.6 + .5 * scaleVec.y, 0));
 
     switch(intRange(0, 1)){
     case 0:
