@@ -12,7 +12,7 @@ int Terrain::ix(int x, int y, int w) {
     return x + w*y;
 }
 
-Terrain::Terrain() : m_numRows(1025), m_numCols(m_numRows), m_heights(std::vector<float>(m_numRows*m_numCols, -100)), m_shape(), m_programID(0), m_textureID(0)
+Terrain::Terrain() : m_numRows(257), m_numCols(m_numRows), m_heights(std::vector<float>(m_numRows*m_numCols, -100)), m_shape(), m_programID(0), m_textureID(0)
 {
     m_heights[0] = randValue(0, 0);
     m_heights[ix(0, m_numCols-1, m_numRows)] = randValue(0, m_numCols-1);
@@ -64,7 +64,7 @@ glm::vec3 Terrain::getPosition(int row, int col)
     }
 
     return position;*/
-    return glm::vec3(10*row/m_numRows - 5, m_heights[ix(row, col, m_numCols)], 10*col/m_numCols-5);
+    return glm::vec3(40*(row - m_numRows/2)/m_numRows, m_heights[ix(row, col, m_numCols)], 40*(col - m_numCols/2)/m_numCols);
 }
 
 
@@ -165,7 +165,7 @@ void Terrain::initHeights()
     QQueue<dmSq> squares = QQueue<dmSq>();
     QQueue<dmSq> diamonds = QQueue<dmSq>();
 
-    float startNoise = 3.5f;
+    float startNoise = 10.f;
 
     std::vector<int> inits = std::vector<int>();
 
@@ -199,16 +199,11 @@ void Terrain::initHeights()
                     top = ix(getCol(curDiam.v_5, m_numCols), getRow(curDiam.v_1, m_numCols) - uDist, m_numCols);
                 }else
                 {
-                    top = -1;
+                    top = ix(getCol(curDiam.v_5, m_numCols), (m_numRows-1) - (uDist - getRow(curDiam.v_1, m_numCols)), m_numCols);
                 }
                 int target = ix(getCol(curDiam.v_5, m_numCols), getRow(curDiam.v_1, m_numCols), m_numCols);
                 squares.enqueue(dmSq(top, curDiam.v_1, curDiam.v_2, curDiam.v_5, target));
-                //Otherwise, we're done!
-                if(target == 174)
-                {
-                    //Yee
-                    int x = 1;
-                }
+
                 //Add diamond two, down
                 int down;
                 //Make sure the new top is in the square
@@ -218,16 +213,11 @@ void Terrain::initHeights()
                     down = ix(getCol(curDiam.v_5, m_numCols), getRow(curDiam.v_3, m_numCols) + dDist, m_numCols);
                 }else
                 {
-                    down = -1;
+                    down = ix(getCol(curDiam.v_5, m_numCols), (dDist - ((m_numRows - 1) - getRow(curDiam.v_3, m_numCols))), m_numCols);
                 }
                 target = ix(getCol(curDiam.v_5, m_numCols), getRow(curDiam.v_3, m_numCols), m_numCols);
                 squares.enqueue(dmSq(curDiam.v_5, curDiam.v_3, curDiam.v_4, down, target));
-                //Otherwise, we're done!
-                if(target == 174)
-                {
-                    //Yee
-                    int x = 1;
-                }
+
                 //Add diamond three, left
                 int left;
                 //Make sure the new top is in the square
@@ -237,16 +227,11 @@ void Terrain::initHeights()
                     left = ix(getCol(curDiam.v_1, m_numCols) - lDist, getRow(curDiam.v_5, m_numCols),m_numCols);
                 }else
                 {
-                    left = -1;
+                    left = -1;//ix((m_numCols-1) - (lDist - getCol(curDiam.v_1, m_numCols)), getRow(curDiam.v_5, m_numCols), m_numCols);
                 }
                 target = ix(getCol(curDiam.v_1, m_numCols), getRow(curDiam.v_5, m_numCols), m_numCols);
                 squares.enqueue(dmSq(curDiam.v_1, left, curDiam.v_5, curDiam.v_3, target));
-                //Otherwise, we're done!
-                if(target == 174)
-                {
-                    //Yee
-                    int x = 1;
-                }
+
                 //Add diamond four, right
                 int right;
                 //Make sure the new top is in the square
@@ -256,17 +241,10 @@ void Terrain::initHeights()
                     right = ix(getCol(curDiam.v_4, m_numCols) + rDist, getRow(curDiam.v_5, m_numCols), m_numCols);
                 }else
                 {
-                    right = -1;
+                    right = -1;//ix(rDist - ((m_numCols - 1) - getCol(curDiam.v_4, m_numCols)), getRow(curDiam.v_5, m_numCols), m_numCols);;
                 }
                 target = ix(getCol(curDiam.v_4, m_numCols), getRow(curDiam.v_5, m_numCols), m_numCols);
                 squares.enqueue(dmSq(curDiam.v_2, curDiam.v_5, right, curDiam.v_4, target));
-
-                //Otherwise, we're done!
-                if(target == 174)
-                {
-                    //Yee
-                    int x = 1;
-                }
 
             }
         }
@@ -303,11 +281,7 @@ void Terrain::initHeights()
                         int p1 = ix(leftCol, upRow, m_numCols);
                         int target = ix(tleftCol, tupRow, m_numCols);
                         diamonds.enqueue(dmSq(p1, curSq.v_1, curSq.v_2, curSq.v_5, target));
-                        if(target == 174)
-                        {
-                            //Yee
-                            int x = 1;
-                        }
+
                     }
 
                     //Upper right diamond
@@ -316,11 +290,7 @@ void Terrain::initHeights()
                         int p2 = ix(rightCol, upRow, m_numCols);
                         int target = ix(trightCol, tupRow, m_numCols);
                         diamonds.enqueue(dmSq(curSq.v_1, p2, curSq.v_5, curSq.v_3, target));
-                        if(target == 174)
-                        {
-                            //Yee
-                            int x = 1;
-                        }
+
                     }
 
                     //Lower left diamond
@@ -329,11 +299,7 @@ void Terrain::initHeights()
                         int p3 = ix(leftCol, downRow, m_numCols);
                         int target = ix(tleftCol, tdownRow, m_numCols);
                         diamonds.enqueue(dmSq(curSq.v_2, curSq.v_5, p3, curSq.v_4, target));
-                        if(target == 174)
-                        {
-                            //Yee
-                            int x = 1;
-                        }
+
                     }
 
                     //Lower right diamond
@@ -377,27 +343,31 @@ void Terrain::init()
         {
             data[index++] = getPosition(row, col);
             data[index++] = getNormal  (row, col);
-            data[index++] = glm::vec3(static_cast<float>(col)/static_cast<float>(m_numCols),
-                                      static_cast<float>(row)/static_cast<float>(m_numRows),
-                                      0.f);
+            //data[index++] = glm::vec3((static_cast<float>(col)/static_cast<float>(m_numCols))/40,
+//                                      (static_cast<float>(row)/static_cast<float>(m_numRows))/40,
+//                                      0.f);
+            data[index++] = glm::vec3(1.f, 1.f, 1.f);
 
             data[index++] = getPosition(row + 1, col);
             data[index++] = getNormal  (row + 1, col);
-            data[index++] = glm::vec3(static_cast<float>(col)/static_cast<float>(m_numCols),
-                                      static_cast<float>(row+1)/static_cast<float>(m_numRows),
-                                      0.f);
+            //data[index++] = glm::vec3((static_cast<float>(col)/static_cast<float>(m_numCols))/40,
+//                                      (static_cast<float>(row+1)/static_cast<float>(m_numRows))/40,
+//                                      0.f);
+            data[index++] = glm::vec3(1.f, 1.f, 1.f);
         }
         data[index++] = getPosition(row + 1, 0);
         data[index++] = getNormal  (row + 1, 0);
-        data[index++] = glm::vec3(static_cast<float>(0)/static_cast<float>(m_numCols),
-                                  static_cast<float>(row+1)/static_cast<float>(m_numRows),
-                                  0.f);
+        //data[index++] = glm::vec3((static_cast<float>(0)/static_cast<float>(m_numCols))/40,
+//                                  (static_cast<float>(row+1)/static_cast<float>(m_numRows))/40,
+//                                  0.f);
+        data[index++] = glm::vec3(1.f, 1.f, 1.f);
 
         data[index++] = getPosition(row + 1, m_numCols - 1);
         data[index++] = getNormal  (row + 1, m_numCols - 1);
-        data[index++] = glm::vec3(static_cast<float>(m_numCols-1)/static_cast<float>(m_numCols),
-                                  static_cast<float>(row+1)/static_cast<float>(m_numRows),
-                                  0.f);
+        //data[index++] = glm::vec3((static_cast<float>(m_numCols-1)/static_cast<float>(m_numCols))/40,
+//                                  (static_cast<float>(row+1)/static_cast<float>(m_numRows))/40,
+//                                  0.f);
+        data[index++] = glm::vec3(1.f, 1.f, 1.f);
     }
 
     // Initialize OpenGLShape.
