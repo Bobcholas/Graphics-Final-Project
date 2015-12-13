@@ -68,6 +68,8 @@ Statue::TripleVec Statue::limbStarter(TripleVec base){
 void Statue::addBody(){
     glm::mat4 scale = glm::scale(glm::vec3(floatRange(2, 3), floatRange(2, 4), floatRange(1, 2)));
 
+    height = 1.9 + (scale * glm::vec4(0, .5, 0, 1)).y;
+
     switch(intRange(0, 1)){
     case 0:
     case 1:
@@ -102,6 +104,7 @@ void Statue::addBody(){
                                                   glm::vec4(0, 0, 1, 0)});
         addHead(starter.point, glm::normalize(starter.dir));
     }
+
 }
 
 void Statue::addHead(glm::vec4 point, glm::vec4 up){
