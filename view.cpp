@@ -66,6 +66,9 @@ void View::initializeGL()
     ResourceLoader::initializeGlew();
     initializeSkyBoxGL();
     initializeParticlesGL();
+
+
+    m_terrainProgramID = ResourceLoader::createShaderProgram(":/shaders/terrain.vert", ":/shaders/terrain.frag");
     m_terrain.init();
 }
 
@@ -195,6 +198,7 @@ void View::drawTerrain() {
     glUniformMatrix4fv(glGetUniformLocation(m_terrainProgramID, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
     glUniformMatrix4fv(glGetUniformLocation(m_terrainProgramID, "view"), 1, GL_FALSE, glm::value_ptr(m_view));
     glUniformMatrix4fv(glGetUniformLocation(m_terrainProgramID, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+
     m_terrain.draw();
 
     glDisable(GL_DEPTH_TEST);
@@ -257,7 +261,6 @@ void View::initializeParticlesGL()
 {
     //ResourceLoader::initializeGlew();
     m_textureProgramID = ResourceLoader::createShaderProgram(":/shaders/texture.vert", ":/shaders/texture.frag");
-    m_terrainProgramID = ResourceLoader::createShaderProgram(":/shaders/terrain.vert", ":/shaders/terrain.frag");
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Defines the color the screen will be cleared to.
     //resizeGL(width(), height());
