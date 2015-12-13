@@ -361,6 +361,7 @@ void View::createParticleManager(glm::vec3 initialpos, unsigned int maxp,float s
     newpm->setFuzziness(fuzziness);
     newpm->setForce(force);
     newpm->setTexID(m_numManagers);
+    newpm->resetParticles();
     m_particlemanagers.push_back(std::move(newpm));
     m_numManagers+=1;
 
@@ -647,12 +648,12 @@ GLuint View::loadSkyBoxTex(){
 
     //right left top bottom back front
     std::vector<QImage> boximages;
-    boximages.push_back(QImage(":/images/right.jpg"));
-    boximages.push_back(QImage(":/images/left.jpg"));
-    boximages.push_back(QImage(":/images/top.jpg"));
-    boximages.push_back(QImage(":/images/bottom.jpg"));
-    boximages.push_back(QImage(":/images/back.jpg"));
-    boximages.push_back(QImage(":/images/front.jpg"));
+    boximages.push_back(QImage(":/images/posx.jpg"));
+    boximages.push_back(QImage(":/images/negx.jpg"));
+    boximages.push_back(QImage(":/images/posy.jpg"));
+    boximages.push_back(QImage(":/images/negy.jpg"));
+    boximages.push_back(QImage(":/images/posz.jpg"));
+    boximages.push_back(QImage(":/images/negz.jpg"));
     glGenTextures(1, &m_textureId);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureId);
     QImage image;
@@ -660,7 +661,7 @@ GLuint View::loadSkyBoxTex(){
     {
         image = boximages.at(i);
         //glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image );
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,0,GL_RGBA,image.width(),image.height(),0,GL_RGBA,GL_UNSIGNED_BYTE,image.bits());
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,0,GL_RGBA,image.width(),image.height(),0,GL_BGRA,GL_UNSIGNED_BYTE,image.bits());
 
     }
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

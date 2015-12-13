@@ -13,5 +13,17 @@
         <file>left.jpg</file>
         <file>right.jpg</file>
         <file>top.jpg</file>
+        <file>posx.jpg</file>
+        <file>posy.jpg</file>
+        <file>posz.jpg</file>
+        <file>negz.jpg</file>
+        <file>negy.jpg</file>
+        <file>negx.jpg</file>
+        <file>plains-of-abraham_bk.tga</file>
+        <file>plains-of-abraham_dn.tga</file>
+        <file>plains-of-abraham_ft.tga</file>
+        <file>plains-of-abraham_lf.tga</file>
+        <file>plains-of-abraham_rt.tga</file>
+        <file>plains-of-abraham_up.tga</file>
     </qresource>
 </RCC>
