@@ -124,8 +124,6 @@ void Statue::addHead(glm::vec4 point, glm::vec4 up){
 }
 
 void Statue::addLimb(TripleVec tv, int joints){
-    std::cout << joints << std::endl;
-    std::cout << glm::to_string(tv.point) << std::endl;
     if (joints == 0){
         return;
     }

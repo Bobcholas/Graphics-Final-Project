@@ -6,9 +6,15 @@
 class OpenGLShape
 {
 public:
-    OpenGLShape();
+    OpenGLShape() { }
 
-    ~OpenGLShape();
+    ~OpenGLShape() { }
+
+    /** Creates a new VBO and VAO on the GPU. */
+    void create();
+
+    /** Deletes the VBO and VAO from the GPU. */
+    void destroy();
 
     /** Initialize the VBO with the given vertex data. */
     void setVertexData(GLfloat *data, GLsizeiptr size, GLenum drawMode, int numVertices);

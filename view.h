@@ -7,6 +7,7 @@
 #include <QGLWidget>
 
 #include "ParticleManager.h"
+#include "terrain.h"
 #include <QTime>
 #include <QTimer>
 #include <memory>
@@ -39,6 +40,7 @@ private:
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
     void drawParticles();//ie opengl stuffs
+    void drawTerrain();
     void updateParticleManagers();//updates all existing particle managers
     void paintParticles();
     void loadTex(int i);
@@ -47,7 +49,9 @@ private:
     void setInitialPosition(glm::vec3 initialposition);//sets intiial position of particle emitter
     void paintParticlesGL();
     void initializeParticlesGL();
-    void createParticleManager(glm::vec3 initialpos, unsigned int mam_normalRendererxp,float scale,std::string texpath,glm::vec3 color, glm::vec3 velocity, float speed,float fuzziness, glm::vec3 force);
+    void createParticleManager(glm::vec3 initialpos, unsigned int maxp,float scale,std::string texpath,glm::vec3 color, glm::vec3 velocity, float speed,float fuzziness, glm::vec3 force);
+    void loadParticleTex();
+    GLuint loadSkyBoxTex();
     std::unique_ptr<OpenGLShape> m_square;
 
     void initStatue();
@@ -69,6 +73,7 @@ private:
     void applyMaterial(const CS123SceneMaterial &material);
 
     GLuint m_textureProgramID;//texture mapping particle shader
+    GLuint m_terrainProgramID;
 
     GLuint m_textureId;//texture mapping program
 
@@ -82,7 +87,6 @@ private:
     std::vector<std::unique_ptr<ParticleManager>> m_particlemanagers;
     int m_numManagers;
 
-
     std::vector<Statue*> m_statues;
 
     std::map<std::string, GLint> m_uniformLocs;
@@ -91,10 +95,18 @@ private:
     std::list<TransPrimitive> m_transPrims;
     std::list<CS123SceneLightData> m_lights;
 
-
+    Terrain m_terrain;
+;
+    std::unique_ptr<OpenGLShape> m_quad;
+    //skybox stuff
+    void initializeSkyBoxGL();
+    void paintSkyBoxGL();
+    GLuint m_skyBoxTex;
+    GLuint* m_pmtex;
 
 private slots:
     void tick();
+
 };
 
 #endif // VIEW_H

@@ -1,17 +1,15 @@
 #include "openglshape.h"
 
-OpenGLShape::OpenGLShape() :
-    m_vboID(0),
-    m_vaoID(0),
-    m_numVertices(0),
-    m_drawMode(GL_TRIANGLES)
+void OpenGLShape::create()
 {
+    // Generates a VBO and VAO for this shape.
     glGenBuffers(1, &m_vboID);
     glGenVertexArrays(1, &m_vaoID);
 }
 
-OpenGLShape::~OpenGLShape()
+void OpenGLShape::destroy()
 {
+    // Deletes the VBO and VAO.
     glDeleteBuffers(1, &m_vboID);
     glDeleteVertexArrays(1, &m_vaoID);
 }

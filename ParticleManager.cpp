@@ -5,7 +5,7 @@ ParticleManager::ParticleManager(unsigned int maxparticles,std::string texpath):
   m_scale(0.3f),
   m_color(glm::vec3(1.0f,0.5f,0.2f)),
   m_velocity(glm::vec3(0.0f,0.0001f,0.0f)),
-  m_force(glm::vec3(0.f,0.0001f,0.0f))//,
+  m_force(glm::vec3(0.f,0.0001f,0.0f))
 //  m_position(glm::vec3(0.f)),m_tex(nullptr),m_textureId(0)
 {
     m_maxParticles = maxparticles;
@@ -37,6 +37,7 @@ void ParticleManager::updateParticles(){
 void ParticleManager::setInitialPosition(glm::vec3 initialposition){
     m_position = initialposition;
 }
+//from a stackoverflow post mostly: http://stackoverflow.com/questions/686353/c-random-float-number-generation
 float ParticleManager::randFloat(float lo, float hi){
     return lo + static_cast<float>(rand()) /( static_cast<float>(RAND_MAX/(hi-lo)));
 }

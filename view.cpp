@@ -2,8 +2,12 @@
 
 #include <QApplication>
 #include <QKeyEvent>
-#include "particlesystem/glwidget.h"
+
+#define GLM_FORCE_RADIANS
 #include "glm/glm.hpp"            // glm::vec*, mat*, and basic glm functions
+#include "glm/gtx/transform.hpp"  // glm::translate, scale, rotate
+#include "glm/gtc/type_ptr.hpp"   // glm::value_ptr
+
 #include "openglshape.h"
 #include "particlesystem/cs123_lib/resourceloader.h"
 #include "iostream"
@@ -22,13 +26,15 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_textureProgramID(0),
     m_textureId(0),
     m_statueShaderProgramID(0),
-    m_angleX(0), m_angleY(0.5f), m_zoom(10.f),m_numManagers(0)
+    m_angleX(0), m_angleY(0.5f), m_zoom(10.f),m_numManagers(0),
+    m_terrainProgramID(0),m_skyBoxTex(0)
 {
+    //initializeGL();
     // View needs all mouse move events, not just mouse drag events
-    setMouseTracking(true);
+    //setMouseTracking(true);
 
     // Hide the cursor since this is a fullscreen app
-    setCursor(Qt::BlankCursor);
+    //setCursor(Qt::BlankCursor);
 
     // View needs keyboard focus
     setFocusPolicy(Qt::StrongFocus);
@@ -47,16 +53,14 @@ View::View(QWidget *parent) : QGLWidget(parent),
 
     srand(time(0));
 
+    //createParticleManager(glm::vec3(10.f),20,0.1f,":/images/particle1.bmp",glm::vec3(1.0f,0.5f,0.2f),glm::vec3(0.0f,20.0001f,20.0f),(80.0f/100000.f),25.0f,glm::vec3(0.f,0.0001f,0.0f));
+
+
 }
 
 View::~View()
 {
     // TODO: Clean up GPU memory.
-    GLuint id;
-    for(int i =0;i<m_particlemanagers.size();i++){
-        id = m_particlemanagers.at(i)->getTexID();
-        glDeleteTextures(1,&id);
-    }
 
     for (int i = 0; i < 5; i++){
         delete primitives[i];
@@ -67,6 +71,10 @@ View::~View()
         Statue *cur = *iter;
         delete cur;
     }
+
+    glDeleteTextures(m_particlemanagers.size(),m_pmtex);
+    delete[] m_pmtex;
+    glDeleteTextures(1,&m_textureId);
 
 }
 
@@ -87,17 +95,25 @@ void View::initializeGL()
     // events. This occurs if there are two monitors and the mouse is on the
     // secondary monitor.
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
+    ResourceLoader::initializeGlew();
+    initializeSkyBoxGL();
     initializeParticlesGL();
+
     initStatue();
+
+    m_terrain.init();
+
 }
 
 void View::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // TODO: Implement the demo rendering here
-    //paintParticlesGL();
+    paintSkyBoxGL();
+    drawTerrain();
     paintStatues();
+    paintParticlesGL();
+
 }
 
 void View::resizeGL(int w, int h)
@@ -124,8 +140,9 @@ void View::mouseMoveEvent(QMouseEvent *event)
     int deltaX = event->x() - width() / 2;
     int deltaY = event->y() - height() / 2;
     if (!deltaX && !deltaY) return;
-    QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
     **/
+    //QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
+
     // TODO: Handle mouse movements here
     m_angleX += 10 * (event->x() - m_prevMousePos.x()) / (float) width();
     m_angleY += 10 * (event->y() - m_prevMousePos.y()) / (float) height();
@@ -167,7 +184,7 @@ void View::tick()
 void View::loadTex(int i){
     QImage image=m_particlemanagers.at(i)->getTex();
     GLuint pmid = m_particlemanagers.at(i)->getTexID();
-    std::cout << pmid <<std::endl;
+    //std::cout << pmid <<std::endl;
     glGenTextures(1,&pmid);
     glBindTexture(GL_TEXTURE_2D,pmid);
     glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,image.width(),image.height(),0,GL_RGBA,GL_UNSIGNED_BYTE,image.bits());
@@ -204,6 +221,22 @@ void View::squareData(float scale){
     // TODO (Task 7): Interleave UV-coordinates along with positions and colors in your VBO
     m_square->setAttribute(2,2,GL_FLOAT,GL_FALSE,8*sizeof(GLfloat),(3+3)*sizeof(GLfloat));
 }
+
+void View::drawTerrain() {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glUseProgram(m_terrainProgramID);
+
+    glUniformMatrix4fv(glGetUniformLocation(m_terrainProgramID, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
+    glUniformMatrix4fv(glGetUniformLocation(m_terrainProgramID, "view"), 1, GL_FALSE, glm::value_ptr(m_view));
+    glUniformMatrix4fv(glGetUniformLocation(m_terrainProgramID, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+    m_terrain.draw();
+
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glUseProgram(0);
+}
+
 //this probably gets called in some kind of paint method
 void View::drawParticles(){
 
@@ -219,16 +252,11 @@ void View::drawParticles(){
     glUniformMatrix4fv(glGetUniformLocation(m_textureProgramID, "view"), 1, GL_FALSE, glm::value_ptr(m_view));
     //get model, etc. into the vertex shader, then translate by positiion
     std::vector<Particle> curparticles;
-    QImage image;
     for(int j = 0;j<m_particlemanagers.size();j++){
         curparticles = m_particlemanagers.at(j)->getParticles();
         squareData(m_particlemanagers.at(j)->getScale());
         //bind tex + other methods
-        image = m_particlemanagers.at(j)->getTex();
-        glBindTexture(GL_TEXTURE_2D,m_particlemanagers.at(j)->getTexID());
-        glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,image.width(),image.height(),0,GL_RGBA,GL_UNSIGNED_BYTE,image.bits());
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);//param?
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D,m_pmtex[j]);
         for(int i = 0;i<curparticles.size();i++){
             //create translation transformation
             translatemodel = glm::translate(glm::mat4(1.f),curparticles.at(i).pos);
@@ -242,8 +270,11 @@ void View::drawParticles(){
 
 void View::paintParticles(){
     //possibly clear some buffers
+
+    glEnable(GL_BLEND);
     updateParticleManagers();
     drawParticles();
+    glDisable(GL_BLEND);
 }
 
 
@@ -260,25 +291,32 @@ void View::rebuildMatrices()
 
 void View::initializeParticlesGL()
 {
-    ResourceLoader::initializeGlew();
+    //ResourceLoader::initializeGlew();
+    m_textureProgramID = ResourceLoader::createShaderProgram(":/shaders/texture.vert", ":/shaders/texture.frag");
+    m_terrainProgramID = ResourceLoader::createShaderProgram(":/shaders/terrain.vert", ":/shaders/terrain.frag");
+
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Defines the color the screen will be cleared to.
+    //resizeGL(width(), height());
+
+    //glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_CULL_FACE);
 
     // Creates the three shader programs.
     m_textureProgramID = ResourceLoader::createShaderProgram(":/shaders/texture.vert", ":/shaders/texture.frag");
+    loadParticleTex();
+    //squareData(); handled on case by case basis
 
-    //squareData();
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE,GL_ONE);
 
 }
 
 void View::paintParticlesGL()
 {
-
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE);//could use GL_SRC_ALPHA, experiment
     updateParticleManagers();
     drawParticles();
-
+    glDisable(GL_BLEND);
 }
 /**
 void View::resetParticles(){
@@ -315,12 +353,9 @@ void View::createParticleManager(glm::vec3 initialpos, unsigned int maxp,float s
     newpm->setForce(force);
     newpm->setTexID(m_numManagers);
     m_particlemanagers.push_back(std::move(newpm));
-    GLuint pmid = m_particlemanagers.at(m_numManagers)->getTexID();
-    glGenTextures(1,&pmid);
     m_numManagers+=1;
 
 }
-
 
 void View::initStatue(){
     //whee different shader progs
@@ -338,8 +373,6 @@ void View::initStatue(){
     m_uniformLocs["useTexture"] = glGetUniformLocation(m_statueShaderProgramID, "useTexture");
     m_uniformLocs["tex"] = glGetUniformLocation(m_statueShaderProgramID, "tex");
     m_uniformLocs["blend"] = glGetUniformLocation(m_statueShaderProgramID, "blend");
-
-    glEnable(GL_DEPTH_TEST);
 
     Statue *s = new Statue();
     m_statues.push_back(s);
@@ -417,7 +450,7 @@ void View::paintStatues(){
 //    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(m_statueShaderProgramID);
-    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
 
     // Set scene uniforms.
     //clear lights first
@@ -439,7 +472,7 @@ void View::paintStatues(){
 
     drawStatues();
 
-
+    glDisable(GL_DEPTH_TEST);
 
     glUseProgram(0);
 }
@@ -504,3 +537,118 @@ void View::setLight(const CS123SceneLightData &light)
                 light.function.x, light.function.y, light.function.z);
 }
 
+void View::initializeSkyBoxGL(){
+    m_skyBoxTex = ResourceLoader::createShaderProgram(":/shaders/textureVanilla.vert", ":/shaders/texture1.frag");
+    //input cube data
+    m_quad.reset(new OpenGLShape());
+    m_quad->create();
+    GLfloat skyboxVertices[] = {
+            // Positions
+            -20.0f,  20.0f, -20.0f,
+            -20.0f, -20.0f, -20.0f,
+             20.0f, -20.0f, -20.0f,
+             20.0f, -20.0f, -20.0f,
+             20.0f,  20.0f, -20.0f,
+            -20.0f,  20.0f, -20.0f,
+
+            -20.0f, -20.0f,  20.0f,
+            -20.0f, -20.0f, -20.0f,
+            -20.0f,  20.0f, -20.0f,
+            -20.0f,  20.0f, -20.0f,
+            -20.0f,  20.0f,  20.0f,
+            -20.0f, -20.0f,  20.0f,
+
+             20.0f, -20.0f, -20.0f,
+             20.0f, -20.0f,  20.0f,
+             20.0f,  20.0f,  20.0f,
+             20.0f,  20.0f,  20.0f,
+             20.0f,  20.0f, -20.0f,
+             20.0f, -20.0f, -20.0f,
+
+            -20.0f, -20.0f,  20.0f,
+            -20.0f,  20.0f,  20.0f,
+             20.0f,  20.0f,  20.0f,
+             20.0f,  20.0f,  20.0f,
+             20.0f, -20.0f,  20.0f,
+            -20.0f, -20.0f,  20.0f,
+
+            -20.0f,  20.0f, -20.0f,
+             20.0f,  20.0f, -20.0f,
+             20.0f,  20.0f,  20.0f,
+             20.0f,  20.0f,  20.0f,
+            -20.0f,  20.0f,  20.0f,
+            -20.0f,  20.0f, -20.0f,
+
+            -20.0f, -20.0f, -20.0f,
+            -20.0f, -20.0f,  20.0f,
+             20.0f, -20.0f, -20.0f,
+             20.0f, -20.0f, -20.0f,
+            -20.0f, -20.0f,  20.0f,
+             20.0f, -20.0f,  20.0f
+        };
+    m_quad->setVertexData(skyboxVertices,18*6*sizeof(float),GL_TRIANGLES,18*6*2);
+    m_quad->setAttribute(0,3,GL_FLOAT,GL_FALSE,3*sizeof(GLfloat),0);
+    //m_quad->setAttribute(1,2,GL_FLOAT,GL_FALSE,5*sizeof(GLfloat),3*sizeof(GLfloat));
+    loadSkyBoxTex();
+}
+//skybox methods derived from http://learnopengl.com/#!Advanced-OpenGL/Cubemaps
+void View::paintSkyBoxGL(){
+    glEnable(GL_DEPTH_TEST);
+
+    glUseProgram(m_skyBoxTex);
+    glm::mat4x4 scalemodel(1.0f);
+    scalemodel = glm::scale(glm::mat4(1.f),glm::vec3(10,10,10.f));;
+    glUniformMatrix4fv(glGetUniformLocation(m_skyBoxTex, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
+    glUniformMatrix4fv(glGetUniformLocation(m_skyBoxTex, "view"), 1, GL_FALSE, glm::value_ptr(m_view));
+    glUniformMatrix4fv(glGetUniformLocation(m_skyBoxTex, "model"), 1, GL_FALSE, glm::value_ptr(m_model));
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureId);
+    m_quad->draw();
+    glUseProgram(0);
+    glDisable(GL_DEPTH_TEST);
+}
+GLuint View::loadSkyBoxTex(){
+
+    //right left top bottom back front
+    std::vector<QImage> boximages;
+    boximages.push_back(QImage(":/images/right.jpg"));
+    boximages.push_back(QImage(":/images/left.jpg"));
+    boximages.push_back(QImage(":/images/top.jpg"));
+    boximages.push_back(QImage(":/images/bottom.jpg"));
+    boximages.push_back(QImage(":/images/back.jpg"));
+    boximages.push_back(QImage(":/images/front.jpg"));
+    glGenTextures(1, &m_textureId);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureId);
+    QImage image;
+    for(GLuint i = 0; i < 6; i++)
+    {
+        image = boximages.at(i);
+        //glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image );
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,0,GL_RGBA,image.width(),image.height(),0,GL_RGBA,GL_UNSIGNED_BYTE,image.bits());
+
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    return m_textureId;
+}
+//create particlemanager first, then load all textures, store in array of GLuint
+//inspired by http://www.gamasutra.com/view/feature/131768/understanding_and_using_opengl_.php?page=5
+void View::loadParticleTex(){\
+    m_pmtex = new GLuint[m_particlemanagers.size()];
+    glGenTextures(m_particlemanagers.size(),m_pmtex);
+    GLuint pmid;
+    QImage image;
+    for(int i = 0;i<m_particlemanagers.size();i++){
+        image=m_particlemanagers.at(i)->getTex();
+        pmid = m_particlemanagers.at(i)->getTexID();
+        //std::cout << pmid <<std::endl;
+
+        glBindTexture(GL_TEXTURE_2D,m_pmtex[i]);
+        glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,image.width(),image.height(),0,GL_RGBA,GL_UNSIGNED_BYTE,image.bits());
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);//param?
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    }
+}
