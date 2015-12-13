@@ -37,6 +37,7 @@ void ParticleManager::updateParticles(){
 void ParticleManager::setInitialPosition(glm::vec3 initialposition){
     m_position = initialposition;
 }
+//from a stackoverflow post mostly: http://stackoverflow.com/questions/686353/c-random-float-number-generation
 float ParticleManager::randFloat(float lo, float hi){
     return lo + static_cast<float>(rand()) /( static_cast<float>(RAND_MAX/(hi-lo)));
 }

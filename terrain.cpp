@@ -12,7 +12,7 @@ int Terrain::ix(int x, int y, int w) {
     return x + w*y;
 }
 
-Terrain::Terrain() : m_numRows(2049), m_numCols(m_numRows), m_heights(std::vector<float>(m_numRows*m_numCols, -100)), m_shape(), m_programID(0), m_textureID(0)
+Terrain::Terrain() : m_numRows(1025), m_numCols(m_numRows), m_heights(std::vector<float>(m_numRows*m_numCols, -100)), m_shape(), m_programID(0), m_textureID(0)
 {
     m_heights[0] = randValue(0, 0);
     m_heights[ix(0, m_numCols-1, m_numRows)] = randValue(0, m_numCols-1);

@@ -80,4 +80,6 @@ DISTFILES += \
     particlesystem/shaders/terrain.vert
 OTHER_FILES += \
     particlesystem/shaders/texture.frag \
-    particlesystem/shaders/texture.vert
+    particlesystem/shaders/texture.vert \
+    particlesystem/shaders/textureVanilla.vert \
+    particlesystem/shaders/texture1.frag

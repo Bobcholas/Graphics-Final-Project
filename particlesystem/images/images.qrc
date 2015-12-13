@@ -7,5 +7,11 @@
         <file>dirt.jpg</file>
         <file>dirt2.jpg</file>
         <file>grass.jpg</file>
+        <file>back.jpg</file>
+        <file>bottom.jpg</file>
+        <file>front.jpg</file>
+        <file>left.jpg</file>
+        <file>right.jpg</file>
+        <file>top.jpg</file>
     </qresource>
 </RCC>
