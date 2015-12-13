@@ -43,6 +43,8 @@ private:
     void paintParticlesGL();
     void initializeParticlesGL();
     void createParticleManager(glm::vec3 initialpos, unsigned int maxp,float scale,std::string texpath,glm::vec3 color, glm::vec3 velocity, float speed,float fuzziness, glm::vec3 force);
+    void loadParticleTex();
+    GLuint loadSkyBoxTex();
     std::unique_ptr<OpenGLShape> m_square;
 
 
@@ -57,6 +59,12 @@ private:
     QPoint m_prevMousePos;
     std::vector<std::unique_ptr<ParticleManager>> m_particlemanagers;
     int m_numManagers;
+    std::unique_ptr<OpenGLShape> m_quad;
+    //skybox stuff
+    void initializeSkyBoxGL();
+    void paintSkyBoxGL();
+    GLuint m_skyBoxTex;
+    GLuint* m_pmtex;
 private slots:
     void tick();
 };
