@@ -1,5 +1,6 @@
 QT += core gui opengl
 CONFIG += c++11
+
 TARGET = final
 unix:!macx{
     LIBS += -lGLU

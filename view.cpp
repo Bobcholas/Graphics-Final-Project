@@ -12,10 +12,20 @@
 #include "particlesystem/cs123_lib/resourceloader.h"
 #include "iostream"
 #include "ParticleManager.h"
+
+#include "shapes/ShapeCube.h"
+#include "shapes/ShapeCone.h"
+#include "shapes/ShapeCylinder.h"
+#include "shapes/ShapeSphere.h"
+
+#include <sstream>
+
+
 View::View(QWidget *parent) : QGLWidget(parent),
     m_square(nullptr),
     m_textureProgramID(0),
     m_textureId(0),
+    m_statueShaderProgramID(0),
     m_angleX(0), m_angleY(0.5f), m_zoom(10.f),m_numManagers(0),
     m_terrainProgramID(0),m_skyBoxTex(0)
 {
@@ -34,16 +44,38 @@ View::View(QWidget *parent) : QGLWidget(parent),
     //m_particles = std::vector<Particle>(m_maxParticles); resetParticles(); now handled in particle managers
     createParticleManager(glm::vec3(0.f),100,0.5f,":/images/particle3.jpg",glm::vec3(1.0f,0.5f,0.2f),glm::vec3(0.0f,0.0001f,0.0f),(25.0f/10000.f),50.0f,glm::vec3(0.f,0.001f,0.0f));
     createParticleManager(glm::vec3(3.f),300,0.1f,":/images/particle2.bmp",glm::vec3(1.0f,0.5f,0.2f),glm::vec3(0.0f,0.0001f,0.0f),(80.0f/100000.f),25.0f,glm::vec3(0.f,0.0001f,0.0f));
+
+    primitives[PRIMITIVE_CUBE] = new ShapeCube(1, 1, 1);
+    primitives[PRIMITIVE_CONE] = new ShapeCone(1, 1, 1);
+    primitives[PRIMITIVE_CYLINDER] = new ShapeCylinder(1, 1, 1);
+    primitives[PRIMITIVE_TORUS] = new ShapeCube(1, 1, 1); //I have no torus
+    primitives[PRIMITIVE_SPHERE] = new ShapeSphere(1, 1, 1);
+
+    srand(time(0));
+
     //createParticleManager(glm::vec3(10.f),20,0.1f,":/images/particle1.bmp",glm::vec3(1.0f,0.5f,0.2f),glm::vec3(0.0f,20.0001f,20.0f),(80.0f/100000.f),25.0f,glm::vec3(0.f,0.0001f,0.0f));
+
 
 }
 
 View::~View()
 {
     // TODO: Clean up GPU memory.
+
+    for (int i = 0; i < 5; i++){
+        delete primitives[i];
+    }
+
+    for (std::vector<Statue*>::const_iterator iter = m_statues.begin();
+         iter != m_statues.end(); iter++){
+        Statue *cur = *iter;
+        delete cur;
+    }
+
     glDeleteTextures(m_particlemanagers.size(),m_pmtex);
     delete[] m_pmtex;
     glDeleteTextures(1,&m_textureId);
+
 }
 
 void View::initializeGL()
@@ -54,7 +86,7 @@ void View::initializeGL()
 
     // Start a timer that will try to get 60 frames per second (the actual
     // frame rate depends on the operating system and other running programs)
-    time.start();
+    m_time.start();
     timer.start(1000 / 60);
 
     // Center the mouse, which is explained more in mouseMoveEvent() below.
@@ -67,20 +99,20 @@ void View::initializeGL()
     initializeSkyBoxGL();
     initializeParticlesGL();
 
-
     m_terrainProgramID = ResourceLoader::createShaderProgram(":/shaders/terrain.vert", ":/shaders/terrain.frag");
+    initStatue();
     m_terrain.init();
+
 }
 
 void View::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // TODO: Implement the demo rendering here
-
     paintSkyBoxGL();
-    paintParticlesGL();
     drawTerrain();
+    paintStatues();
+    paintParticlesGL();
 
 }
 
@@ -141,7 +173,7 @@ void View::keyReleaseEvent(QKeyEvent *event)
 void View::tick()
 {void createParticleManager(glm::vec3 initialpos, unsigned int maxp);
     // Get the number of seconds since the last tick (variable update rate)
-    float seconds = time.restart() * 0.001f;
+    float seconds = m_time.restart() * 0.001f;
 
     // TODO: Implement the demo update here
 
@@ -216,6 +248,8 @@ void View::drawParticles(){
     glm::mat4 translatemodel(1.f);
     glUseProgram(m_textureProgramID);
 
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
     // Sets projection and view matrix uniforms.
     glUniformMatrix4fv(glGetUniformLocation(m_textureProgramID, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
     glUniformMatrix4fv(glGetUniformLocation(m_textureProgramID, "view"), 1, GL_FALSE, glm::value_ptr(m_view));
@@ -234,12 +268,13 @@ void View::drawParticles(){
             m_square->draw();
         }
     }
+    glDepthMask(GL_TRUE);
     glUseProgram(0);//stop using texmapping program
 }
 
 void View::paintParticles(){
     //possibly clear some buffers
-    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     glEnable(GL_BLEND);
     updateParticleManagers();
     drawParticles();
@@ -247,12 +282,13 @@ void View::paintParticles(){
 }
 
 
+
 void View::rebuildMatrices()
 {
     m_model = glm::mat4(1.f);
     m_view = glm::translate(glm::vec3(0, 0, -m_zoom)) *
-             glm::rotate(m_angleY, glm::vec3(1,0,0)) *
-             glm::rotate(m_angleX, glm::vec3(0,1,0));
+            glm::rotate(m_angleY, glm::vec3(1,0,0)) *
+            glm::rotate(m_angleX, glm::vec3(0,1,0));
     m_projection = glm::perspective(0.8f, (float)width()/height(), 0.1f, 100.f);
     update();
 }
@@ -323,6 +359,187 @@ void View::createParticleManager(glm::vec3 initialpos, unsigned int maxp,float s
     m_numManagers+=1;
 
 }
+
+void View::initStatue(){
+    //whee different shader progs
+    ResourceLoader::initializeGlew();
+    m_statueShaderProgramID = ResourceLoader::createShaderProgram(":/shaders/statue.vert", ":/shaders/statue.frag");
+
+    m_uniformLocs["p"]= glGetUniformLocation(m_statueShaderProgramID, "p");
+    m_uniformLocs["m"]= glGetUniformLocation(m_statueShaderProgramID, "m");
+    m_uniformLocs["v"]= glGetUniformLocation(m_statueShaderProgramID, "v");
+    m_uniformLocs["allBlack"]= glGetUniformLocation(m_statueShaderProgramID, "allBlack");
+    m_uniformLocs["ambient_color"] = glGetUniformLocation(m_statueShaderProgramID, "ambient_color");
+    m_uniformLocs["diffuse_color"] = glGetUniformLocation(m_statueShaderProgramID, "diffuse_color");
+    m_uniformLocs["specular_color"] = glGetUniformLocation(m_statueShaderProgramID, "specular_color");
+    m_uniformLocs["shininess"] = glGetUniformLocation(m_statueShaderProgramID, "shininess");
+    m_uniformLocs["useTexture"] = glGetUniformLocation(m_statueShaderProgramID, "useTexture");
+    m_uniformLocs["tex"] = glGetUniformLocation(m_statueShaderProgramID, "tex");
+    m_uniformLocs["blend"] = glGetUniformLocation(m_statueShaderProgramID, "blend");
+
+    Statue *s = new Statue();
+    m_statues.push_back(s);
+    CS123SceneLightData light;
+    light.color = CS123SceneColor{.6, .6, .6, 1};
+    light.function = glm::vec3(1, 0, 0);
+    light.id = 0;
+    light.pos = glm::vec4(0, 20, 0, 1);
+    light.type = LIGHT_POINT;
+    addLight(light);
+    light.pos = glm::vec4(10, -10, 0, 1);
+    addLight(light);
+    m_global.ka = .5;
+    m_global.kd = .5;
+    m_global.kd = .25;
+
+    primitives[PRIMITIVE_CUBE] = new ShapeCube(1, 1, 1);
+    primitives[PRIMITIVE_CONE] = new ShapeCone(1, 1, 1);
+    primitives[PRIMITIVE_CYLINDER] = new ShapeCylinder(1, 1, 1);
+    primitives[PRIMITIVE_TORUS] = new ShapeCube(1, 1, 1); //I have no torus
+    primitives[PRIMITIVE_SPHERE] = new ShapeSphere(1, 1, 1);
+
+    int detail = 10;
+    for (int i = 0; i < 5; i++){
+        primitives[i]->init();
+        primitives[i]->setT1(detail);
+        primitives[i]->setT2(detail);
+        primitives[i]->setT3(detail);
+        primitives[i]->bufferVerts(m_statueShaderProgramID);
+    }
+}
+
+void View::drawStatues(){
+
+    for (std::vector<Statue*>::const_iterator iter = m_statues.begin();
+         iter != m_statues.end(); iter++){
+        Statue *cur = *iter;
+        std::vector<TransPrimitive> *tps = cur->getObjects();
+        for (std::vector<TransPrimitive>::const_iterator iter = tps->begin();
+             iter != tps->end(); iter++){
+            TransPrimitive tp = *iter;
+            //set model transform and material
+            tp.primitive.material.cAmbient *= m_global.ka;
+            tp.primitive.material.cDiffuse *= m_global.kd;
+            tp.primitive.material.cSpecular *= m_global.ks;
+            applyMaterial(tp.primitive.material);
+            glUniformMatrix4fv(glGetUniformLocation(m_statueShaderProgramID, "m"), 1, GL_FALSE, glm::value_ptr(tp.trans));
+            switch(tp.primitive.type){
+            case PRIMITIVE_TORUS:
+            case PRIMITIVE_CUBE:
+                primitives[PRIMITIVE_CUBE]->draw();
+                break;
+            case PRIMITIVE_CONE:
+                primitives[PRIMITIVE_CONE]->draw();
+                break;
+            case PRIMITIVE_CYLINDER:
+                primitives[PRIMITIVE_CYLINDER]->draw();
+                break;
+            case PRIMITIVE_SPHERE:
+                primitives[PRIMITIVE_SPHERE]->draw();
+                break;    primitives[PRIMITIVE_CUBE] = new ShapeCube(1, 1, 1);
+                primitives[PRIMITIVE_CONE] = new ShapeCone(1, 1, 1);
+                primitives[PRIMITIVE_CYLINDER] = new ShapeCylinder(1, 1, 1);
+                primitives[PRIMITIVE_TORUS] = new ShapeCube(1, 1, 1); //I have no torus
+                primitives[PRIMITIVE_SPHERE] = new ShapeSphere(1, 1, 1);
+            }
+        }
+    }
+}
+
+void View::paintStatues(){
+    // Clear the screen in preparation for the next frame. (Use a gray background instead of a
+    // black one for drawing wireframe or normals so they will show up against the background.)
+//    glClearColor(0, 0, 0, 0);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glUseProgram(m_statueShaderProgramID);
+    glEnable(GL_DEPTH_TEST);
+
+    // Set scene uniforms.
+    //clear lights first
+    for (int i = 0; i < 10; i++) {
+        std::ostringstream os;
+        os << i;
+        std::string indexString = "[" + os.str() + "]"; // e.g. [0], [1], etc.
+        glUniform3f(glGetUniformLocation(m_statueShaderProgramID, ("lightColors" + indexString).c_str()), 0, 0, 0);
+    }
+    setLights(m_view);
+    glUniformMatrix4fv(m_uniformLocs["p"], 1, GL_FALSE,
+            glm::value_ptr(m_projection));
+    glUniformMatrix4fv(m_uniformLocs["v"], 1, GL_FALSE,
+            glm::value_ptr(m_view));
+    glUniformMatrix4fv(m_uniformLocs["m"], 1, GL_FALSE,
+            glm::value_ptr(glm::mat4()));
+    glUniform3f(m_uniformLocs["allBlack"], 1, 1, 1);
+
+
+    drawStatues();
+
+    glDisable(GL_DEPTH_TEST);
+
+    glUseProgram(0);
+}
+
+#define COMPILE_TIME_ASSERT(pred) switch(0){case 0:case pred:;}
+
+void View::applyMaterial(const CS123SceneMaterial &material)
+{
+
+    COMPILE_TIME_ASSERT(sizeof(CS123SceneColor) == sizeof(float) * 4);
+
+    glUniform3fv(m_uniformLocs["ambient_color"], 1, &material.cAmbient.r);
+    glUniform3fv(m_uniformLocs["diffuse_color"], 1, &material.cDiffuse.r);
+    glUniform3fv(m_uniformLocs["specular_color"], 1, &material.cSpecular.r);
+    glUniform1f(m_uniformLocs["shininess"], material.shininess);
+    if (material.textureMap && material.textureMap->isUsed && material.textureMap->texid) {
+        glUniform1i(m_uniformLocs["useTexture"], 1);
+        glUniform1i(m_uniformLocs["tex"], 1);
+        glUniform1f(m_uniformLocs["blend"], material.blend);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, material.textureMap->texid);
+        glActiveTexture(GL_TEXTURE0);
+    } else {
+        glUniform1i(m_uniformLocs["useTexture"], 0);
+    }
+}
+
+void View::setLight(const CS123SceneLightData &light)
+{
+    std::ostringstream os;
+    os << light.id;
+    std::string indexString = "[" + os.str() + "]"; // e.g. [0], [1], etc.
+
+    bool ignoreLight = false;
+
+    GLint lightType;
+    switch(light.type)
+    {
+    case LIGHT_POINT:
+        lightType = 0;
+        glUniform3fv(glGetUniformLocation(m_statueShaderProgramID, ("lightPositions" + indexString).c_str()), 1,
+                     glm::value_ptr(light.pos));
+        break;
+    case LIGHT_DIRECTIONAL:
+        lightType = 1;
+        glUniform3fv(glGetUniformLocation(m_statueShaderProgramID, ("lightDirections" + indexString).c_str()), 1,
+                     glm::value_ptr(glm::normalize(light.dir)));
+        break;
+    default:
+        ignoreLight = true; // Light type not supported
+        break;
+    }
+
+    CS123SceneColor color = light.color;
+    if (ignoreLight) color.r = color.g = color.b = 0;
+
+    glUniform1i(glGetUniformLocation(m_statueShaderProgramID, ("lightTypes" + indexString).c_str()), lightType);
+    glUniform3f(glGetUniformLocation(m_statueShaderProgramID, ("lightColors" + indexString).c_str()),
+                color.r, color.g, color.b);
+    glUniform3f(glGetUniformLocation(m_statueShaderProgramID, ("lightAttenuations" + indexString).c_str()),
+                light.function.x, light.function.y, light.function.z);
+}
+
 void View::initializeSkyBoxGL(){
     m_skyBoxTex = ResourceLoader::createShaderProgram(":/shaders/textureVanilla.vert", ":/shaders/texture1.frag");
     //input cube data

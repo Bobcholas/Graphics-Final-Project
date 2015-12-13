@@ -6,6 +6,8 @@
         <file>gradient.vert</file>
         <file>texture.frag</file>
         <file>texture.vert</file>
+        <file>statue.frag</file>
+        <file>statue.vert</file>
         <file>terrain.frag</file>
         <file>terrain.vert</file>
         <file>textureVanilla.vert</file>

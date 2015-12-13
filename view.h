@@ -5,12 +5,17 @@
 #include "glm/glm.hpp"            // glm::vec*, mat*, and basic glm functions
 #include "GL/glew.h"
 #include <QGLWidget>
-class OpenGLShape;
+
 #include "ParticleManager.h"
 #include "terrain.h"
 #include <QTime>
 #include <QTimer>
 #include <memory>
+#include "shapes/Shape.h"
+#include "shapes/Statue.h"
+
+class OpenGLShape;
+
 
 class View : public QGLWidget
 {
@@ -21,7 +26,7 @@ public:
     ~View();
 
 private:
-    QTime time;
+    QTime m_time;
     QTimer timer;
 
     void initializeGL();
@@ -49,12 +54,31 @@ private:
     GLuint loadSkyBoxTex();
     std::unique_ptr<OpenGLShape> m_square;
 
-
+    void initStatue();
+    void paintStatues();
+    void drawStatues();
+    void setLight(const CS123SceneLightData &light);
+    void addLight(const CS123SceneLightData &sceneLight){
+        m_lights.push_back(sceneLight); //this is a copy
+    }
+    void setLights(const glm::mat4 viewMatrix)
+    {
+        //set view matrix
+        glUniformMatrix4fv(glGetUniformLocation(m_statueShaderProgramID, "v"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+        for (std::list<CS123SceneLightData>::const_iterator iter = m_lights.begin();
+            iter != m_lights.end(); iter++){
+            setLight(*iter);
+        }
+    }
+    void applyMaterial(const CS123SceneMaterial &material);
 
     GLuint m_textureProgramID;//texture mapping particle shader
     GLuint m_terrainProgramID;
 
     GLuint m_textureId;//texture mapping program
+
+    GLuint m_statueShaderProgramID;
+
     glm::mat4 m_model, m_view, m_projection;
 
     /** For mouse interaction. */
@@ -62,13 +86,24 @@ private:
     QPoint m_prevMousePos;
     std::vector<std::unique_ptr<ParticleManager>> m_particlemanagers;
     int m_numManagers;
+
+    std::vector<Statue*> m_statues;
+
+    std::map<std::string, GLint> m_uniformLocs;
+    Shape *primitives[5];
+    CS123SceneGlobalData m_global;
+    std::list<TransPrimitive> m_transPrims;
+    std::list<CS123SceneLightData> m_lights;
+
     Terrain m_terrain;
+;
     std::unique_ptr<OpenGLShape> m_quad;
     //skybox stuff
     void initializeSkyBoxGL();
     void paintSkyBoxGL();
     GLuint m_skyBoxTex;
     GLuint* m_pmtex;
+
 private slots:
     void tick();
 

@@ -22,14 +22,22 @@ private:
 
     void genStatue(glm::mat4 anchorMatrix);
 
+    CS123SceneMaterial m_mat;
+
     glm::mat4 m_anchor;
     std::vector<TransPrimitive> objects;
-    std::queue<TripleVec> attachPoints;
-
-    std::default_random_engine generator;
+    std::deque<TripleVec> attachPoints;
 
     void addBody();
-    void addLimb(TripleVec tv);
+    void addLimb(TripleVec tv, int joints);
+    void addHead(glm::vec4 point, glm::vec4 up);
+
+    int intRange(int lo, int hi);
+    float floatRange(float lo, float hi);
+    glm::vec4 vecAround(glm::vec4 dir);
+    glm::mat4 rotateTo(glm::vec4 from, glm::vec4 to);
+
+    TripleVec limbStarter(TripleVec base);
 
     CS123SceneMaterial randMaterial();
 };
