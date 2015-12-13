@@ -366,10 +366,6 @@ void View::createParticleManager(glm::vec3 initialpos, unsigned int maxp,float s
 
 }
 
-void View::createParticleManagerSimple(glm::vec3 initialpos, glm::vec3 force){
-    createParticleManager(initialpos ,300,0.1f,":/images/particle2.bmp",glm::vec3(1.0f,0.5f,0.2f),glm::vec3(0.0f,0.0001f,0.0f),(80.0f/100000.f),25.0f, force);
-}
-
 void View::initStatue(){
     //whee different shader progs
     ResourceLoader::initializeGlew();
@@ -415,27 +411,57 @@ void View::initStatue(){
         primitives[i]->bufferVerts(m_statueShaderProgramID);
     }
 
-    int num_statues = rand() % 10 + 1;
+    int num_statues = rand() % 6 + 1;
     for (int i = 0; i < num_statues; i++){
-        float x = Statue::floatRange(-19, 19);
-        float quote_y_unquote = Statue::floatRange(-19, 19);
-        glm::vec3 xyz = glm::vec3(x, m_terrain.getHeight(quote_y_unquote, x), quote_y_unquote);
-        std::cout << glm::to_string(xyz) << std::endl;
-        glm::mat4 transform = glm::translate(xyz)
-                * glm::scale(glm::vec3(.2, .2, .2))
-                * Statue::rotateTo(glm::vec4(0, 1, 0, 0), glm::vec4(m_terrain.getNormalVec(quote_y_unquote, x), 0))
-                * glm::rotate(static_cast<float>(Statue::floatRange(0, 2) * M_PI), glm::vec3(0, 1, 0));
-        Statue *s = new Statue(transform);
-        m_statues.push_back(s);
+        float x = Statue::floatRange(-17, 17);
+        float quote_y_unquote = Statue::floatRange(-17, 17);
+        {
+            glm::vec3 xyz = glm::vec3(x, m_terrain.getHeight(quote_y_unquote, x), quote_y_unquote);
+            std::cout << glm::to_string(xyz) << std::endl;
+            glm::mat4 transform = glm::translate(xyz)
+                    * glm::scale(glm::vec3(.2, .2, .2))
+                    * Statue::rotateTo(glm::vec4(0, 1, 0, 0), glm::vec4(m_terrain.getNormalVec(quote_y_unquote, x), 0))
+                    * glm::rotate(static_cast<float>(Statue::floatRange(0, 2) * M_PI), glm::vec3(0, 1, 0));
+            Statue *s = new Statue(transform);
+            m_statues.push_back(s);
+        }
+        x += Statue::intRange(0, 1) * 4 - 2;
+        quote_y_unquote += Statue::intRange(0, 1) * 4 - 2;
+        {
+            glm::vec3 xyz = glm::vec3(x, m_terrain.getHeight(quote_y_unquote, x), quote_y_unquote);
+            std::cout << glm::to_string(xyz) << std::endl;
+            glm::mat4 transform = glm::translate(xyz)
+                    * glm::scale(glm::vec3(.2, .2, .2))
+                    * Statue::rotateTo(glm::vec4(0, 1, 0, 0), glm::vec4(m_terrain.getNormalVec(quote_y_unquote, x), 0))
+                    * glm::rotate(static_cast<float>(Statue::floatRange(0, 2) * M_PI), glm::vec3(0, 1, 0));
+            Statue *s = new Statue(transform);
+            m_statues.push_back(s);
+        }
     }
 
     for (std::vector<Statue*>::const_iterator iter = m_statues.begin();
          iter != m_statues.end(); iter++){
         Statue* stat = *iter;
+        int particleNum = Statue::intRange(0, 2);
         for (std::vector<Statue::DoubleVec>::const_iterator iter = stat->getParticles()->begin();
              iter != stat->getParticles()->end(); iter++){
             Statue::DoubleVec db = *iter;
-            createParticleManager(glm::vec3(db.point),300,0.05f,":/images/particle2.bmp",glm::vec3(1.0f,0.5f,0.2f),glm::vec3(0.0f,0.0001f,0.0f),(80.0f/100000.f),25.0f,glm::vec3(db.dir));
+
+            std::string particlePath;
+            switch (particleNum){
+            case 0:
+                particlePath = ":/images/particle1.bmp";
+                break;
+            case 1:
+                particlePath = ":/images/particle2.bmp";
+                break;
+            default:
+            case 2:
+                particlePath = ":/images/particle3.jpg";
+                break;
+            }
+
+            createParticleManager(glm::vec3(db.point),300,0.05f,particlePath,glm::vec3(1.0f,0.5f,0.2f),glm::vec3(0.0f,0.0001f,0.0f),(80.0f/100000.f),25.0f,glm::vec3(db.dir));
         }
     }
 }
