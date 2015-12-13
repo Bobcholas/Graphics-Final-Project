@@ -182,6 +182,8 @@ void View::squareData(float scale){
 }
 
 void View::drawTerrain() {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     glUseProgram(m_terrainProgramID);
 
     glUniformMatrix4fv(glGetUniformLocation(m_terrainProgramID, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
@@ -189,6 +191,8 @@ void View::drawTerrain() {
     glUniformMatrix4fv(glGetUniformLocation(m_terrainProgramID, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
     m_terrain.draw();
 
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
     glUseProgram(0);
 }
 
@@ -230,9 +234,11 @@ void View::drawParticles(){
 
 void View::paintParticles(){
     //possibly clear some buffers
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_BLEND);
     updateParticleManagers();
     drawParticles();
+    glDisable(GL_BLEND);
 }
 
 

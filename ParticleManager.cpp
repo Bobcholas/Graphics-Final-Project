@@ -5,8 +5,8 @@ ParticleManager::ParticleManager(unsigned int maxparticles,std::string texpath):
   m_scale(0.3f),
   m_color(glm::vec3(1.0f,0.5f,0.2f)),
   m_velocity(glm::vec3(0.0f,0.0001f,0.0f)),
-  m_force(glm::vec3(0.f,0.0001f,0.0f)),
-  m_position(glm::vec3(0.f)),m_tex(nullptr),m_textureId(0)
+  m_force(glm::vec3(0.f,0.0001f,0.0f))
+  //m_position(glm::vec3(0.f)),m_tex(nullptr),m_textureId(0)
 {
     m_maxParticles = maxparticles;
     m_particles = std::vector<Particle>(m_maxParticles);

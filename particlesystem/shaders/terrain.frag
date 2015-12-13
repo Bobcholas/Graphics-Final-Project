@@ -16,12 +16,12 @@ void main() {
     float b = (blending.x + blending.y + blending.z);
     blending /= vec3(b, b, b);
 
-    vec4 xaxis = texture( rockTexture, coords.yz);
-    vec4 yaxis = texture( rockTexture, coords.xz);
-    vec4 zaxis = texture( rockTexture, coords.xy);
+    vec4 xaxis = texture( img, WS_position.yz);
+    vec4 yaxis = texture( img, WS_position.xz);
+    vec4 zaxis = texture( img, WS_position.xy);
 
     vec4 tex = xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
 
     vec4 diff4 = vec4(diff, 0);
-    fragColor = diff*.2 + .7*tex;
+    fragColor = diff4*.2 + .7*tex;
 }

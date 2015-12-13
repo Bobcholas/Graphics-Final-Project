@@ -1,8 +1,10 @@
 QT += core gui opengl
 CONFIG += c++11
 TARGET = final
-unix:!macx:LIBS += -lGLU
-
+unix:!macx{
+    LIBS += -lGLU
+    QMAKE_CXXFLAGS += -std=c++11
+}
 win32 {
     DEFINES += GLEW_STATIC
     LIBS += -lopengl32 -lglu32

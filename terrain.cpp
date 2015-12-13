@@ -12,7 +12,7 @@ int Terrain::ix(int x, int y, int w) {
     return x + w*y;
 }
 
-Terrain::Terrain() : m_numRows(257), m_numCols(m_numRows), m_heights(std::vector<float>(m_numRows*m_numCols, -100)), m_shape(), m_programID(0), m_textureID(0)
+Terrain::Terrain() : m_numRows(2049), m_numCols(m_numRows), m_heights(std::vector<float>(m_numRows*m_numCols, -100)), m_shape(), m_programID(0), m_textureID(0)
 {
     m_heights[0] = randValue(0, 0);
     m_heights[ix(0, m_numCols-1, m_numRows)] = randValue(0, m_numCols-1);
@@ -165,7 +165,7 @@ void Terrain::initHeights()
     QQueue<dmSq> squares = QQueue<dmSq>();
     QQueue<dmSq> diamonds = QQueue<dmSq>();
 
-    float startNoise = 5.f;
+    float startNoise = 3.5f;
 
     std::vector<int> inits = std::vector<int>();
 
@@ -360,13 +360,15 @@ void Terrain::initHeights()
  */
 void Terrain::init()
 {
+    m_shape.create();
     // TODO: Change from GL_LINE to GL_FILL in order to render full triangles instead of wireframe.
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    std::cout<<(m_numRows - 1) * (2*m_numCols + 2)<<"\n";
 
     initHeights();
 
     // Initializes a grid of vertices using triangle strips.
-    int numVertices = (m_numRows - 1) * (2 * m_numCols + 2);
+    int numVertices = (m_numRows - 1) * (2*m_numCols + 2);
     std::vector<glm::vec3> data(3 * numVertices);
     int index = 0;
     for (int row = 0; row < m_numRows - 1; row++)
