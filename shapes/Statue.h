@@ -9,7 +9,7 @@ class Statue
 public:
     Statue();
     ~Statue();
-    Statue(glm::mat4 anchorMatrix);
+    Statue(glm::mat4 anchor);
 
     std::vector<TransPrimitive> * getObjects();
 
@@ -33,8 +33,7 @@ private:
         glm::vec4 bendMax; //maximum bend direction
     };
 
-
-    void genStatue(glm::mat4 anchorMatrix);
+    void genStatue(glm::mat4 anchor);
 
     CS123SceneMaterial m_mat;
 
