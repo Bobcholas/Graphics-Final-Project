@@ -80,12 +80,12 @@ void Statue::addBody(){
         int armJoints = intRange(2, 4);
         int legJoints = 1;
         addLimb(limbStarter(TripleVec{scale * glm::vec4(-.5f, floatRange(-.5f, .5f), floatRange(-.5f, .5f), 1),
-                                      glm::vec4(-1, 0, 0, 0),
-                                      glm::vec4(0, 1, 0, 0)}),
+                                      m_anchor * glm::vec4(-1, 0, 0, 0),
+                                      m_anchor * glm::vec4(0, 1, 0, 0)}),
                 armJoints, true);
         addLimb(limbStarter(TripleVec{scale * glm::vec4(.5f, floatRange(-.5f, .5f), floatRange(-.5f, .5f), 1),
-                                      glm::vec4(1, 0, 0, 0),
-                                      glm::vec4(0, 1, 0, 0)}),
+                                      m_anchor * glm::vec4(1, 0, 0, 0),
+                                      m_anchor * glm::vec4(0, 1, 0, 0)}),
                 armJoints, true);
 
         addLimb(TripleVec{scale * glm::vec4(floatRange(0, .5f), -.5f, floatRange(-.5f, .5f), 1),
@@ -100,15 +100,14 @@ void Statue::addBody(){
         TripleVec starter = limbStarter(TripleVec{scale * glm::vec4(floatRange(-.3f, .3f), .5f, floatRange(-.3f, .3f), 1),
                                                   glm::vec4(0, 1, 0, 0),
                                                   glm::vec4(0, 0, 1, 0)});
-        addHead(starter.point, starter.dir);
+        addHead(starter.point, glm::normalize(starter.dir));
     }
 }
 
 void Statue::addHead(glm::vec4 point, glm::vec4 up){
     TransPrimitive tp;
     float size = floatRange(1, 2);
-    tp.trans = m_anchor *
-            rotateTo(glm::vec4(0, 1, 0, 0), up) *
+    tp.trans = m_anchor * rotateTo(glm::vec4(0, 1, 0, 0), up) *
             glm::translate(glm::vec3(point)) *
             glm::scale(glm::vec3(size*.75, size, size*.8)) *
             glm::translate(glm::vec3(0, .35, 0));
@@ -130,7 +129,7 @@ void Statue::addHead(glm::vec4 point, glm::vec4 up){
 void Statue::addLimb(TripleVec tv, int joints, bool useParticles){
     if (joints == 0){
         if (useParticles){
-            m_particles.push_back(DoubleVec{tv.point, glm::normalize(tv.dir)});
+            m_particles.push_back(DoubleVec{m_anchor * tv.point, glm::normalize(tv.dir)});
         }
         return;
     }
@@ -157,12 +156,12 @@ void Statue::addLimb(TripleVec tv, int joints, bool useParticles){
     float dirMix = floatRange(0, 1);
 
     TransPrimitive tp = TransPrimitive();
-    tp.trans = m_anchor;
-    tp.trans *= glm::translate(glm::vec3(tv.point));
+    glm::mat4 goodtrans = glm::translate(glm::vec3(tv.point));
     glm::mat4 rotator = rotateTo(glm::vec4(0, 1, 0, 0), tv.dir);
-    tp.trans *= rotator;
-    tp.trans *= glm::scale(glm::vec3(1, length, 1));
-    tp.trans *= glm::translate(glm::vec3(0, .5, 0));
+    goodtrans *= rotator
+            * glm::scale(glm::vec3(1, length, 1))
+            * glm::translate(glm::vec3(0, .5, 0));
+    tp.trans = m_anchor * goodtrans;
     //move base to 0, 0; scale by length; move 0, 0 to joint; move into worldspace
 
     switch(0){//intRange(0, 2)){
@@ -186,7 +185,7 @@ void Statue::addLimb(TripleVec tv, int joints, bool useParticles){
         glm::vec4 newDirMax = glm::normalize(dirRotate * tv.bendMax);
 
 
-        addLimb(TripleVec{tp.trans * glm::vec4(0, .5, 0, 1),
+        addLimb(TripleVec{goodtrans * glm::vec4(0, .5, 0, 1),
                           newDir,
                           newDirMax}, joints - 1, useParticles);
         return;

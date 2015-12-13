@@ -22,6 +22,10 @@ public:
         return &m_particles;
     }
 
+    static glm::mat4 rotateTo(glm::vec4 from, glm::vec4 to);
+    static int intRange(int lo, int hi);
+    static float floatRange(float lo, float hi);
+
 private:
     struct TripleVec{
         glm::vec4 point; //where object starts
@@ -43,10 +47,7 @@ private:
     void addLimb(TripleVec tv, int joints, bool useParticles);
     void addHead(glm::vec4 point, glm::vec4 up);
 
-    int intRange(int lo, int hi);
-    float floatRange(float lo, float hi);
-    glm::vec4 vecAround(glm::vec4 dir);
-    glm::mat4 rotateTo(glm::vec4 from, glm::vec4 to);
+    static glm::vec4 vecAround(glm::vec4 dir);
 
     TripleVec limbStarter(TripleVec base);
 
