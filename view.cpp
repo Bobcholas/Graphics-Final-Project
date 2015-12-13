@@ -12,8 +12,10 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_square(nullptr),
     m_textureProgramID(0),
     m_textureId(0),
-    m_angleX(0), m_angleY(0.5f), m_zoom(10.f),m_numManagers(0)
+    m_angleX(0), m_angleY(0.5f), m_zoom(10.f),m_numManagers(0),
+    m_terrainProgramID(0)
 {
+    //initializeGL();
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
 
@@ -28,6 +30,7 @@ View::View(QWidget *parent) : QGLWidget(parent),
     //m_particles = std::vector<Particle>(m_maxParticles); resetParticles(); now handled in particle managers
     createParticleManager(glm::vec3(0.f),100,0.5f,":/images/particle3.jpg",glm::vec3(1.0f,0.5f,0.2f),glm::vec3(0.0f,0.0001f,0.0f),(25.0f/10000.f),50.0f,glm::vec3(0.f,0.001f,0.0f));
     createParticleManager(glm::vec3(3.f),300,0.1f,":/images/particle2.bmp",glm::vec3(1.0f,0.5f,0.2f),glm::vec3(0.0f,0.0001f,0.0f),(80.0f/100000.f),25.0f,glm::vec3(0.f,0.0001f,0.0f));
+
 }
 
 View::~View()
@@ -58,6 +61,7 @@ void View::initializeGL()
     // secondary monitor.
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
     initializeParticlesGL();
+    m_terrain.init();
 }
 
 void View::paintGL()
@@ -65,7 +69,11 @@ void View::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // TODO: Implement the demo rendering here
+
     paintParticlesGL();
+
+    drawTerrain();
+
 }
 
 void View::resizeGL(int w, int h)
@@ -172,6 +180,18 @@ void View::squareData(float scale){
     // TODO (Task 7): Interleave UV-coordinates along with positions and colors in your VBO
     m_square->setAttribute(2,2,GL_FLOAT,GL_FALSE,8*sizeof(GLfloat),(3+3)*sizeof(GLfloat));
 }
+
+void View::drawTerrain() {
+    glUseProgram(m_terrainProgramID);
+
+    glUniformMatrix4fv(glGetUniformLocation(m_terrainProgramID, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
+    glUniformMatrix4fv(glGetUniformLocation(m_terrainProgramID, "view"), 1, GL_FALSE, glm::value_ptr(m_view));
+    glUniformMatrix4fv(glGetUniformLocation(m_terrainProgramID, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+    m_terrain.draw();
+
+    glUseProgram(0);
+}
+
 //this probably gets called in some kind of paint method
 void View::drawParticles(){
 
@@ -229,10 +249,16 @@ void View::rebuildMatrices()
 void View::initializeParticlesGL()
 {
     ResourceLoader::initializeGlew();
+    m_textureProgramID = ResourceLoader::createShaderProgram(":/shaders/texture.vert", ":/shaders/texture.frag");
+    m_terrainProgramID = ResourceLoader::createShaderProgram(":/shaders/terrain.vert", ":/shaders/terrain.frag");
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Defines the color the screen will be cleared to.
+    //resizeGL(width(), height());
+
+    //glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_CULL_FACE);
 
     // Creates the three shader programs.
-    m_textureProgramID = ResourceLoader::createShaderProgram(":/shaders/texture.vert", ":/shaders/texture.frag");
+
 
     //squareData();
 

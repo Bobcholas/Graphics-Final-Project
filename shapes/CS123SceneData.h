@@ -11,6 +11,10 @@
 #include <string>
 #include "GL/glew.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>

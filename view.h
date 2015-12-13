@@ -7,6 +7,7 @@
 #include <QGLWidget>
 class OpenGLShape;
 #include "ParticleManager.h"
+#include "terrain.h"
 #include <QTime>
 #include <QTimer>
 #include <memory>
@@ -34,6 +35,7 @@ private:
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
     void drawParticles();//ie opengl stuffs
+    void drawTerrain();
     void updateParticleManagers();//updates all existing particle managers
     void paintParticles();
     void loadTex(int i);
@@ -48,6 +50,7 @@ private:
 
 
     GLuint m_textureProgramID;//texture mapping particle shader
+    GLuint m_terrainProgramID;
 
     GLuint m_textureId;//texture mapping program
     glm::mat4 m_model, m_view, m_projection;
@@ -57,8 +60,10 @@ private:
     QPoint m_prevMousePos;
     std::vector<std::unique_ptr<ParticleManager>> m_particlemanagers;
     int m_numManagers;
+    Terrain m_terrain;
 private slots:
     void tick();
+
 };
 
 #endif // VIEW_H

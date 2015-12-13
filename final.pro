@@ -2,6 +2,13 @@ QT += core gui opengl
 CONFIG += c++11
 TARGET = final
 unix:!macx:LIBS += -lGLU
+
+win32 {
+    DEFINES += GLEW_STATIC
+    LIBS += -lopengl32 -lglu32
+    QMAKE_CXXFLAGS += -std=c++11
+}
+
 macx {
     QMAKE_CFLAGS_X86_64 += -mmacosx-version-min=10.7
     QMAKE_CXXFLAGS_X86_64 = $$QMAKE_CFLAGS_X86_64
@@ -27,7 +34,8 @@ SOURCES += main.cpp \
     shapes/ShapeCylinder.cpp \
     shapes/ShapeSphere.cpp \
     shapes/Statue.cpp \
-    shapes/FinalProjDataStructs.cpp
+    shapes/FinalProjDataStructs.cpp \
+    terrain.cpp
 
 HEADERS += mainwindow.h \
     view.h \
@@ -41,7 +49,8 @@ HEADERS += mainwindow.h \
     shapes/ShapeCylinder.h \
     shapes/ShapeSphere.h \
     shapes/Statue.h \
-    shapes/CS123SceneData.h
+    shapes/CS123SceneData.h \
+    terrain.h
 
 FORMS += mainwindow.ui
 
@@ -62,7 +71,11 @@ macx {
 
 DISTFILES += \
     shaders/shader.frag \
-    shaders/shader.vert
+    shaders/shader.vert \
+    shaders/terrain.frag \
+    shaders/terrain.vert \
+    particlesystem/shaders/terrain.frag \
+    particlesystem/shaders/terrain.vert
 OTHER_FILES += \
     particlesystem/shaders/texture.frag \
     particlesystem/shaders/texture.vert

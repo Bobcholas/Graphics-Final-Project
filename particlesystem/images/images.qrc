@@ -4,5 +4,8 @@
         <file>particle3.jpg</file>
         <file>particle1.bmp</file>
         <file>particle2.bmp</file>
+        <file>dirt.jpg</file>
+        <file>dirt2.jpg</file>
+        <file>grass.jpg</file>
     </qresource>
 </RCC>
