@@ -50,6 +50,7 @@ private:
     void paintParticlesGL();
     void initializeParticlesGL();
     void createParticleManager(glm::vec3 initialpos, unsigned int maxp,float scale,std::string texpath,glm::vec3 color, glm::vec3 velocity, float speed,float fuzziness, glm::vec3 force);
+    void createParticleManagerSimple(glm::vec3 initialpos, glm::vec3 force);
     void loadParticleTex();
     GLuint loadSkyBoxTex();
     std::unique_ptr<OpenGLShape> m_square;
