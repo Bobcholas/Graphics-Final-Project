@@ -40,6 +40,8 @@ public:
 
     void draw();
 
+    float getHeight(float x, float y);
+
 private:
     void initHeights();
 

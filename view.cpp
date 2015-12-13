@@ -100,6 +100,11 @@ void View::initializeGL()
     initStatue();
     m_terrain.init();
 
+    std::cout<<m_terrain.getHeight(-20, -20)<<std::endl;
+    std::cout<<m_terrain.getHeight(-20, 20)<<std::endl;
+    std::cout<<m_terrain.getHeight(20, -20)<<std::endl;
+    std::cout<<m_terrain.getHeight(20, 20)<<std::endl;
+    std::cout<<m_terrain.getHeight(0, 0)<<std::endl;
 
     initializeParticlesGL();
 }

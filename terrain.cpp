@@ -67,6 +67,13 @@ glm::vec3 Terrain::getPosition(int row, int col)
     return glm::vec3(40*(row - m_numRows/2)/m_numRows, m_heights[ix(row, col, m_numCols)], 40*(col - m_numCols/2)/m_numCols);
 }
 
+float Terrain::getHeight(float x, float y)
+{
+    int row = static_cast<int>((x*m_numCols)/40 + (m_numCols/2));
+    int col = static_cast<int>((y*m_numRows)/40 + (m_numRows/2));
+    return m_heights[ix(col, row, m_numCols)];
+}
+
 
 /**
  * Returns the normal vector for the terrain vertex at the given row and column.
@@ -365,7 +372,6 @@ void Terrain::init()
     m_shape.create();
     // TODO: Change from GL_LINE to GL_FILL in order to render full triangles instead of wireframe.
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    std::cout<<(m_numRows - 1) * (2*m_numCols + 2)<<"\n";
 
     initHeights();
 
