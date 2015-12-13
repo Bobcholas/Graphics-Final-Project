@@ -57,7 +57,7 @@ private:
 
     static int ix(int x, int y, int w);
 
-    float heightVal(int ix);
+    float avgVal(dmSq ds);
 
     bool validCol(int col);
 

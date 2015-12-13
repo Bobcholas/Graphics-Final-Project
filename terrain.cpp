@@ -12,7 +12,7 @@ int Terrain::ix(int x, int y, int w) {
     return x + w*y;
 }
 
-Terrain::Terrain() : m_numRows(257), m_numCols(m_numRows), m_heights(std::vector<float>(m_numRows*m_numCols, -100)), m_shape(), m_programID(0), m_textureID(0)
+Terrain::Terrain() : m_numRows(1025), m_numCols(m_numRows), m_heights(std::vector<float>(m_numRows*m_numCols, -100)), m_shape(), m_programID(0), m_textureID(0)
 {
     m_heights[0] = randValue(0, 0);
     m_heights[ix(0, m_numCols-1, m_numRows)] = randValue(0, m_numCols-1);
@@ -95,15 +95,60 @@ glm::vec3 Terrain::getNormal(int row, int col)
     return normal;
 }
 
-float Terrain::heightVal(int ix)
+float Terrain::avgVal(dmSq ds)
 {
-    if(ix < 0 || ix >= m_numCols*m_numRows)
+    //Return the average of the 4 values of diamond square.
+    float sum = 0;
+    bool cutOff = false;
+
+    if(ds.v_1 >= 0 && ds.v_1 < m_numCols*m_numRows)
     {
-        return 0.f;
+        sum+= m_heights[ds.v_1];
     }else
     {
-        return m_heights[ix];
+        cutOff = true;
     }
+
+    if(ds.v_2 >= 0 && ds.v_2 < m_numCols*m_numRows)
+    {
+        sum+= m_heights[ds.v_2];
+    }else
+    {
+        cutOff = true;
+    }
+
+    if(ds.v_3 >= 0 && ds.v_3 < m_numCols*m_numRows)
+    {
+        sum+= m_heights[ds.v_3];
+    }else
+    {
+        cutOff = true;
+    }
+
+    if(ds.v_4 >= 0 && ds.v_4 < m_numCols*m_numRows)
+    {
+        sum+= m_heights[ds.v_4];
+    }else
+    {
+        cutOff = true;
+    }
+
+    if(cutOff)
+    {
+        return sum/3.f;
+    }else
+    {
+        return sum/4.f;
+    }
+
+
+//    if(ix < 0 || ix >= m_numCols*m_numRows)
+//    {
+//        //return 0.f;
+//    }else
+//    {
+//        return m_heights[ix];
+//    }
 }
 
 bool Terrain::validRow(int row)
@@ -182,10 +227,7 @@ void Terrain::initHeights()
             dmSq curDiam = diamonds.dequeue();
             if(m_heights[curDiam.v_5] == -100)
             {
-                float avg = (heightVal(curDiam.v_1)+
-                            heightVal(curDiam.v_2)+
-                            heightVal(curDiam.v_3)+
-                            heightVal(curDiam.v_4))/4.0;
+                float avg = avgVal(curDiam);
                 m_heights[curDiam.v_5] = avg + (((double) rand() / (RAND_MAX)) - .5)*startNoise;
                 //Check each of the 4 diamonds
 
@@ -199,7 +241,7 @@ void Terrain::initHeights()
                     top = ix(getCol(curDiam.v_5, m_numCols), getRow(curDiam.v_1, m_numCols) - uDist, m_numCols);
                 }else
                 {
-                    top = ix(getCol(curDiam.v_5, m_numCols), (m_numRows-1) - (uDist - getRow(curDiam.v_1, m_numCols)), m_numCols);
+                    top = -1;//ix(getCol(curDiam.v_5, m_numCols), (m_numRows-1) - uDist, m_numCols);
                 }
                 int target = ix(getCol(curDiam.v_5, m_numCols), getRow(curDiam.v_1, m_numCols), m_numCols);
                 squares.enqueue(dmSq(top, curDiam.v_1, curDiam.v_2, curDiam.v_5, target));
@@ -213,7 +255,7 @@ void Terrain::initHeights()
                     down = ix(getCol(curDiam.v_5, m_numCols), getRow(curDiam.v_3, m_numCols) + dDist, m_numCols);
                 }else
                 {
-                    down = ix(getCol(curDiam.v_5, m_numCols), (dDist - ((m_numRows - 1) - getRow(curDiam.v_3, m_numCols))), m_numCols);
+                    down = -1;//ix(getCol(curDiam.v_5, m_numCols), dDist, m_numCols);
                 }
                 target = ix(getCol(curDiam.v_5, m_numCols), getRow(curDiam.v_3, m_numCols), m_numCols);
                 squares.enqueue(dmSq(curDiam.v_5, curDiam.v_3, curDiam.v_4, down, target));
@@ -227,7 +269,9 @@ void Terrain::initHeights()
                     left = ix(getCol(curDiam.v_1, m_numCols) - lDist, getRow(curDiam.v_5, m_numCols),m_numCols);
                 }else
                 {
-                    left = -1;//ix((m_numCols-1) - (lDist - getCol(curDiam.v_1, m_numCols)), getRow(curDiam.v_5, m_numCols), m_numCols);
+                    //top = ix(getCol(curDiam.v_5, m_numCols), (m_numRows-1) - (uDist - getRow(curDiam.v_1, m_numCols)), m_numCols);
+                    //left = ix((m_numCols-1) - lDist, getRow(curDiam.v_5, m_numCols), m_numCols);
+                    left = -1;
                 }
                 target = ix(getCol(curDiam.v_1, m_numCols), getRow(curDiam.v_5, m_numCols), m_numCols);
                 squares.enqueue(dmSq(curDiam.v_1, left, curDiam.v_5, curDiam.v_3, target));
@@ -255,10 +299,7 @@ void Terrain::initHeights()
             //Make sure there's still iterations to do
             if(m_heights[curSq.v_5] == -100)
             {
-                float avg = (heightVal(curSq.v_1)+
-                heightVal(curSq.v_2)+
-                heightVal(curSq.v_3)+
-                heightVal(curSq.v_4))/4.0;
+                float avg = avgVal(curSq);
                 m_heights[curSq.v_5] = avg + (((double) rand() / (RAND_MAX)) -.5)*startNoise;
 
                 if(getCol(curSq.v_5, m_numCols) - getCol(curSq.v_2, m_numCols) > 1 || getRow(curSq.v_5, m_numCols) - getRow(curSq.v_1, m_numCols) > 1)
@@ -308,11 +349,6 @@ void Terrain::initHeights()
                         int p4 = ix(rightCol, downRow, m_numCols);
                         int target = ix(trightCol, tdownRow, m_numCols);
                         diamonds.enqueue(dmSq(curSq.v_5, curSq.v_3, curSq.v_4, p4, target));
-                        if(target == 174)
-                        {
-                            //Yee
-                            int x = 1;
-                        }
                     }
                 }
             }

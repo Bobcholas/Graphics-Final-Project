@@ -224,7 +224,7 @@ void View::squareData(float scale){
 
 void View::drawTerrain() {
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    //glEnable(GL_CULL_FACE);
     glUseProgram(m_terrainProgramID);
 
     glUniformMatrix4fv(glGetUniformLocation(m_terrainProgramID, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
@@ -234,7 +234,7 @@ void View::drawTerrain() {
     m_terrain.draw();
 
     glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
+    //glDisable(GL_CULL_FACE);
     glUseProgram(0);
 }
 
