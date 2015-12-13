@@ -6,5 +6,7 @@
         <file>gradient.vert</file>
         <file>texture.frag</file>
         <file>texture.vert</file>
+        <file>statue.frag</file>
+        <file>statue.vert</file>
     </qresource>
 </RCC>
