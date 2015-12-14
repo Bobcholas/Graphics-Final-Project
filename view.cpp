@@ -168,22 +168,22 @@ void View::keyPressEvent(QKeyEvent *event)
     // TODO: Handle keyboard presses here
     if(event->key()== Qt::Key_Up){
         for(int i=0;i<m_particlemanagers.size();i++){
-            m_particlemanagers.at(i)->setSpeed(m_particlemanagers.at(i)->getSpeed()+.0008);
+            m_particlemanagers.at(i)->setSpeed(glm::max(m_particlemanagers.at(i)->getSpeed()+.0008f,0.f));
         }
     }
     if(event->key()== Qt::Key_Down){
         for(int i=0;i<m_particlemanagers.size();i++){
-            m_particlemanagers.at(i)->setSpeed(m_particlemanagers.at(i)->getSpeed()-.0008);
+            m_particlemanagers.at(i)->setSpeed(glm::max(m_particlemanagers.at(i)->getSpeed()-.0008f,0.f));
         }
     }
     if(event->key()== Qt::Key_Right){
         for(int i=0;i<m_particlemanagers.size();i++){
-            m_particlemanagers.at(i)->setFuzziness(m_particlemanagers.at(i)->getFuzziness()+10);
+            m_particlemanagers.at(i)->setFuzziness(glm::max(m_particlemanagers.at(i)->getFuzziness()+10.f,0.f));
         }
     }
     if(event->key()== Qt::Key_Left){
         for(int i=0;i<m_particlemanagers.size();i++){
-            m_particlemanagers.at(i)->setFuzziness(m_particlemanagers.at(i)->getFuzziness()-10);
+            m_particlemanagers.at(i)->setFuzziness(glm::max(m_particlemanagers.at(i)->getFuzziness()-10.f,0.f));
         }
     }
 }
