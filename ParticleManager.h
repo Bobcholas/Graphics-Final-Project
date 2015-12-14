@@ -36,6 +36,7 @@ public:
     inline void setFuzziness(float newfuzziness){m_fuzziness = newfuzziness;}
     inline void setTexID(GLuint newid){m_textureId=newid;}
     inline GLuint getTexID(){return m_textureId;}
+    inline std::string getTexPath(){return m_texpath;}
 private:
     std::vector<Particle> m_particles;
     unsigned int m_maxParticles;//particle limit
@@ -48,5 +49,6 @@ private:
     glm::vec3 m_position;//initial position of emitter (and particles)
     QImage m_tex;//path to texmap image
     GLuint m_textureId;//texid
+    std::string m_texpath;
 };
 #endif // PARTICLEMANAGER_H

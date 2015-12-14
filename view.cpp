@@ -443,7 +443,7 @@ void View::initStatue(){
     for (std::vector<Statue*>::const_iterator iter = m_statues.begin();
          iter != m_statues.end(); iter++){
         Statue* stat = *iter;
-        int particleNum = Statue::intRange(0, 2);
+        int particleNum = Statue::intRange(0, 5);
         for (std::vector<Statue::DoubleVec>::const_iterator iter = stat->getParticles()->begin();
              iter != stat->getParticles()->end(); iter++){
             Statue::DoubleVec db = *iter;
@@ -456,8 +456,17 @@ void View::initStatue(){
             case 1:
                 particlePath = ":/images/particle2.bmp";
                 break;
-            default:
             case 2:
+                particlePath = ":/images/acid-front.jpg";
+                break;
+            case 3:
+                particlePath = ":/images/fireball-front.jpg";
+                break;
+            case 4:
+                particlePath = ":/images/starfield-300x300.jpg";
+                break;
+            default:
+            case 5:
                 particlePath = ":/images/particle3.jpg";
                 break;
             }
@@ -703,13 +712,21 @@ void View::loadParticleTex(){\
     glGenTextures(m_particlemanagers.size(),m_pmtex);
     GLuint pmid;
     QImage image;
+    std::string texpath;
     for(int i = 0;i<m_particlemanagers.size();i++){
         image=m_particlemanagers.at(i)->getTex();
         pmid = m_particlemanagers.at(i)->getTexID();
         //std::cout << pmid <<std::endl;
 
         glBindTexture(GL_TEXTURE_2D,m_pmtex[i]);
-        glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,image.width(),image.height(),0,GL_RGBA,GL_UNSIGNED_BYTE,image.bits());
+        texpath = m_particlemanagers.at(i)->getTexPath();
+        if(texpath==":/images/starfield-300x300.jpg"||texpath==":/images/fireball-front.jpg"){
+            //starfield and fireball textures are a bit different and need a different setting
+            glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,image.width(),image.height(),0,GL_BGRA,GL_UNSIGNED_BYTE,image.bits());
+        }
+        else{
+            glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,image.width(),image.height(),0,GL_RGBA,GL_UNSIGNED_BYTE,image.bits());
+        }
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);//param?
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     }

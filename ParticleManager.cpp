@@ -12,6 +12,7 @@ ParticleManager::ParticleManager(unsigned int maxparticles,std::string texpath):
     m_particles = std::vector<Particle>(m_maxParticles);
     resetParticles();
     //load texmap
+    m_texpath = texpath;
     QString texname = QString(&texpath[0]);
     m_tex = QImage(texname);
 }
