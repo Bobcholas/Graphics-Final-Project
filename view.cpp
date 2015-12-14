@@ -44,11 +44,11 @@ View::View(QWidget *parent) : QGLWidget(parent),
     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
     //m_particles = std::vector<Particle>(m_maxParticles); resetParticles(); now handled in particle managers
 
-    primitives[PRIMITIVE_CUBE] = new ShapeCube(1, 1, 1);
-    primitives[PRIMITIVE_CONE] = new ShapeCone(1, 1, 1);
-    primitives[PRIMITIVE_CYLINDER] = new ShapeCylinder(1, 1, 1);
-    primitives[PRIMITIVE_TORUS] = new ShapeCube(1, 1, 1); //I have no torus
-    primitives[PRIMITIVE_SPHERE] = new ShapeSphere(1, 1, 1);
+    primitives[PRIMITIVE_CUBE] = std::unique_ptr<Shape>(new ShapeCube(1, 1, 1));
+    primitives[PRIMITIVE_CONE] = std::unique_ptr<Shape>(new ShapeCone(1, 1, 1));
+    primitives[PRIMITIVE_CYLINDER] = std::unique_ptr<Shape>(new ShapeCylinder(1, 1, 1));
+    primitives[PRIMITIVE_TORUS] = std::unique_ptr<Shape>(new ShapeCube(1, 1, 1));
+    primitives[PRIMITIVE_SPHERE] = std::unique_ptr<Shape>(new ShapeSphere(1, 1, 1));
 
     srand(time(0));
 
@@ -61,9 +61,9 @@ View::~View()
 {
     // TODO: Clean up GPU memory.
 
-    for (int i = 0; i < 5; i++){
-        delete primitives[i];
-    }
+//    for (int i = 0; i < 5; i++){
+//        delete primitives[i]; //unique pointers
+//    }
 
     for (std::vector<Statue*>::const_iterator iter = m_statues.begin();
          iter != m_statues.end(); iter++){
@@ -423,13 +423,7 @@ void View::initStatue(){
     addLight(light);
     m_global.ka = .5;
     m_global.kd = .5;
-    m_global.kd = .25;
-
-    primitives[PRIMITIVE_CUBE] = new ShapeCube(1, 1, 1);
-    primitives[PRIMITIVE_CONE] = new ShapeCone(1, 1, 1);
-    primitives[PRIMITIVE_CYLINDER] = new ShapeCylinder(1, 1, 1);
-    primitives[PRIMITIVE_TORUS] = new ShapeCube(1, 1, 1); //I have no torus
-    primitives[PRIMITIVE_SPHERE] = new ShapeSphere(1, 1, 1);
+    m_global.ks = .25;
 
     int detail = 10;
     for (int i = 0; i < 5; i++){
@@ -442,8 +436,12 @@ void View::initStatue(){
 
     int num_statues = rand() % 6 + 1;
     for (int i = 0; i < num_statues; i++){
-        float x = Statue::floatRange(-17, 17);
-        float quote_y_unquote = Statue::floatRange(-17, 17);
+        float x = Statue::floatRange(-14, 14);
+        float quote_y_unquote = Statue::floatRange(-14, 14);
+        if (i == 0){
+            x = 0.01;
+            quote_y_unquote = 0.01;
+        }
         {
             glm::vec3 xyz = glm::vec3(x, m_terrain.getHeight(quote_y_unquote, x), quote_y_unquote);
             std::cout << glm::to_string(xyz) << std::endl;
@@ -532,11 +530,7 @@ void View::drawStatues(){
                 break;
             case PRIMITIVE_SPHERE:
                 primitives[PRIMITIVE_SPHERE]->draw();
-                break;    primitives[PRIMITIVE_CUBE] = new ShapeCube(1, 1, 1);
-                primitives[PRIMITIVE_CONE] = new ShapeCone(1, 1, 1);
-                primitives[PRIMITIVE_CYLINDER] = new ShapeCylinder(1, 1, 1);
-                primitives[PRIMITIVE_TORUS] = new ShapeCube(1, 1, 1); //I have no torus
-                primitives[PRIMITIVE_SPHERE] = new ShapeSphere(1, 1, 1);
+                break;
             }
         }
     }
@@ -570,7 +564,6 @@ void View::paintStatues(){
 
 
     drawStatues();
-
     glDisable(GL_DEPTH_TEST);
 
     glUseProgram(0);

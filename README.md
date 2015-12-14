@@ -33,6 +33,23 @@ Particle images came from the particle lab particle images and one from here htt
 Green particle:http://opengameart.org/node/7709
 Fireball particle:http://opengameart.org/node/7724
 
+
+Procedural dudes: 
+
+The people scattered through the landscape are wizards, because that's cooler than statues. 
+They are complex figures composed of multiple objects.
+Each one maintains a list of the objects it comprises and how to draw them (as in sceneview). 
+
+They are created and posed randomly; after much trial and error with parameters, their arms now are usually in cool spellcasting stances.
+They can be placed in any location, and the constructor takes as an argument a transformation matrix that should be applied to all elements; this matrix is used in our project to place them on the surface of the terrain, standing at an angle equal to the terrain's normal at that point. 
+
+Some things that were tried (but discarded because they looked weird) were differently shaped body parts; for example, cube/sphere limbs can be easily reenabled, but the resulting limbs look much more robotic than wizardly. So, we stuck with cylinders and spherical joints for the limbs, so that everything would look nice and smooth.
+
+The random creation process generates outwards from the torso; the body creates a head and 4 limbs, and guarantees that the arms and legs will be similar lengths by requiring them to have the same number of joints. 
+The limb-building process counts down joints until the limb is done, then puts a particle emitter on the end with some wobble from the previous direction so it's not just shooting straight out of the ends of the arms.
+The process itself attempts to keep limbs roughly within a plane; this mimics real limbs and makes the arms look more natural and less like horrible abominations.
+
+
 Bugs:
 
 Particle system color settings may not have an effect. They primarily use textures. 

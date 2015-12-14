@@ -92,7 +92,7 @@ private:
     std::vector<Statue*> m_statues;
 
     std::map<std::string, GLint> m_uniformLocs;
-    Shape *primitives[5];
+    std::unique_ptr<Shape> primitives[5];
     CS123SceneGlobalData m_global;
     std::list<TransPrimitive> m_transPrims;
     std::list<CS123SceneLightData> m_lights;
