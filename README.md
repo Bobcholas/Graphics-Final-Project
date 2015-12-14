@@ -1,4 +1,6 @@
 # Graphics-Final-Project
+README
+rncunnin, zloery, sch3
 User control:
 
 currently, the user is capable of dragging the camera around using the mouse and zooming out with the wheel. 
@@ -12,7 +14,7 @@ interchangeable texture mapping
 rudimentary physics
 blending
 multiple particle emitters
-billboarding
+billboarding (based on this tutorial which was sent by the mentor TA: http://www.geeks3d.com/20140807/billboarding-vertex-shader-glsl/ )
 The implementation of the particle system was based on the particle lab. It likely uses the same billboarding technique as well.
  
 It generally  consists of particle managers, which update and reset particles as their life decays. The properties of the particles, such as the speed of the particle emissions or the initial position of the emitter can be adjusted on the creation of a particle manager. 
@@ -54,3 +56,6 @@ Bugs:
 Something that isn't a bug but looks like one is wizard feet. They poke slightly into the ground because the terrain isn't flat- and hovering wizards look much sillier than wizards with feet melding with the ground, especially since you can't really tell it's happening unless you're looking from below.
 
 Particle system color settings may not have an effect. They primarily use textures. 
+Particle updates and resetting calls on the at method a lot. I tried to abstract this out, but this made particles vanish after a period of time. 
+Particle active parameter is unused.
+Putting the texture map QImage in the initializer list of particle manager resulted in crashes on some systems. This has been commented out.
