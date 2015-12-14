@@ -65,6 +65,7 @@ Bugs:
 Something that isn't a bug but looks like one is wizard feet. They poke slightly into the ground because the terrain isn't flat- and hovering wizards look much sillier than wizards with feet melding with the ground, especially since you can't really tell it's happening unless you're looking from below.
 
 Particle system color settings may not have an effect. They primarily use textures. 
-Particle updates and resetting calls on the at method a lot. I tried to abstract this out, but this made particles vanish after a period of time. 
+Particle updates and resetting calls on the at method a lot. sch3 tried to abstract this out, but this made particles vanish after a period of time. 
 Particle active parameter is unused.
 Putting the texture map QImage in the initializer list of particle manager resulted in crashes on some systems. This has been commented out.
+Squares are recreated using a different array each time a particle manager needs to paint them again. This doesn't seem to cause any notable slowdown and only uses a small fixed array of vertices. 
