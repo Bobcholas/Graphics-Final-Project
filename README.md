@@ -21,6 +21,15 @@ A list of these managers is in view, which handles openGL operations for this pa
 
 For future reference, the force parameter generally focuses the particles on the direction of the force.
 
+
+Terrain Generation:
+The terrain is procedurally generated using the diamond-square algorithm on a 1025x1025 grid of points. This generates a height for each position that is fairly continuous, though the balance between smoothness and interesting terrain features can be tweaked by playing with initialNoise and noiseFactor in terrain.cpp. I then approximated a normal for each point using the same technique from lab 5 in which the normals of the 8 adjacent triangles were averaged, and used this for diffuse lighting.
+
+The diffuse lighting was then blended with a texture map to create the final color. However, because uv-coordinate mapping caused very obvious stretching when two adjacent points had very different height values (which often happened around the central point or other points determined before noise was dampened), I used tri-planar texture mapping. This required applying the texture three separate times (once in each of the three major positive axes, blended so that the total contributions summed to one using the normal of the groun).
+
+This led to interesting terrain, but it was difficult to see all the fine details without distracting from the scene. To solve this, I added the option of turning off the terrain texture and rendering using only the diffuse + ambient lighting model, which shows how detailed the terrain is.
+
+
 Skybox:
 Extra feature implemented in spare time. It creates a cubemap and a cube through points, then essentially uses glTexImage2D like a texture map for each face. It also has its own wrapping and filtering thorugh glTexParameteri. 
 
@@ -32,6 +41,8 @@ Particle images came from the particle lab particle images and one from here htt
 
 Green particle:http://opengameart.org/node/7709
 Fireball particle:http://opengameart.org/node/7724
+
+Terrain texture came from http://kay-vriend.blogspot.com/2012/09/easy-automated-normal-and-specular-map.html
 
 Bugs:
 
