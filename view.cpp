@@ -444,7 +444,6 @@ void View::initStatue(){
         }
         {
             glm::vec3 xyz = glm::vec3(x, m_terrain.getHeight(quote_y_unquote, x), quote_y_unquote);
-            std::cout << glm::to_string(xyz) << std::endl;
             glm::mat4 transform = glm::translate(xyz)
                     * glm::scale(glm::vec3(.2, .2, .2))
                     * Statue::rotateTo(glm::vec4(0, 1, 0, 0), glm::vec4(m_terrain.getNormalVec(quote_y_unquote, x), 0))
@@ -456,7 +455,6 @@ void View::initStatue(){
         quote_y_unquote += Statue::intRange(0, 1) * 4 - 2;
         {
             glm::vec3 xyz = glm::vec3(x, m_terrain.getHeight(quote_y_unquote, x), quote_y_unquote);
-            std::cout << glm::to_string(xyz) << std::endl;
             glm::mat4 transform = glm::translate(xyz)
                     * glm::scale(glm::vec3(.2, .2, .2))
                     * Statue::rotateTo(glm::vec4(0, 1, 0, 0), glm::vec4(m_terrain.getNormalVec(quote_y_unquote, x), 0))

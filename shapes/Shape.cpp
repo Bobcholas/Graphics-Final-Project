@@ -8,8 +8,6 @@ Shape::Shape(int t1, int t2, int t3)
 }
 
 Shape::~Shape(){
-    std::cout << "deleting shape, nothing done" << std::endl;
-
     glDeleteVertexArrays(1, &m_vaoID);
     glGenBuffers(1, &m_vboID);
 }
