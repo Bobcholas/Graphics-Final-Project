@@ -37,6 +37,8 @@ public:
     inline void setTexID(GLuint newid){m_textureId=newid;}
     inline GLuint getTexID(){return m_textureId;}
     inline std::string getTexPath(){return m_texpath;}
+    inline float getSpeed(){return m_speed;}
+    inline float getFuzziness(){return m_fuzziness;}
 private:
     std::vector<Particle> m_particles;
     unsigned int m_maxParticles;//particle limit

@@ -2,6 +2,10 @@
 User control:
 
 currently, the user is capable of dragging the camera around using the mouse and zooming out with the wheel. 
+1 and 2 switch textures for terrain on and off
+up/down keys increase/decrease particle simulation speed
+left/right keys decrease/increase particle randomness
+
 Particle System:
 This particle system has several features:
 interchangeable texture mapping

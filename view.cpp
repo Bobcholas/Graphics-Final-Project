@@ -165,6 +165,26 @@ void View::keyPressEvent(QKeyEvent *event)
     if (event->key() == Qt::Key_Escape) QApplication::quit();
 
     // TODO: Handle keyboard presses here
+    if(event->key()== Qt::Key_Up){
+        for(int i=0;i<m_particlemanagers.size();i++){
+            m_particlemanagers.at(i)->setSpeed(m_particlemanagers.at(i)->getSpeed()+.0008);
+        }
+    }
+    if(event->key()== Qt::Key_Down){
+        for(int i=0;i<m_particlemanagers.size();i++){
+            m_particlemanagers.at(i)->setSpeed(m_particlemanagers.at(i)->getSpeed()-.0008);
+        }
+    }
+    if(event->key()== Qt::Key_Right){
+        for(int i=0;i<m_particlemanagers.size();i++){
+            m_particlemanagers.at(i)->setFuzziness(m_particlemanagers.at(i)->getFuzziness()+10);
+        }
+    }
+    if(event->key()== Qt::Key_Left){
+        for(int i=0;i<m_particlemanagers.size();i++){
+            m_particlemanagers.at(i)->setFuzziness(m_particlemanagers.at(i)->getFuzziness()-10);
+        }
+    }
 }
 void View::wheelEvent(QWheelEvent *event)
 {
