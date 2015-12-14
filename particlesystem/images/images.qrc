@@ -25,5 +25,8 @@
         <file>plains-of-abraham_lf.tga</file>
         <file>plains-of-abraham_rt.tga</file>
         <file>plains-of-abraham_up.tga</file>
+        <file>pebbles2.png</file>
+        <file>rocks.jpg</file>
+        <file>cobblestone.png</file>
     </qresource>
 </RCC>

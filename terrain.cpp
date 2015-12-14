@@ -224,7 +224,7 @@ void Terrain::initHeights()
     QQueue<dmSq> squares = QQueue<dmSq>();
     QQueue<dmSq> diamonds = QQueue<dmSq>();
 
-    float startNoise = 10.f;
+    float startNoise = 5.f;
 
     std::vector<int> inits = std::vector<int>();
 
@@ -427,7 +427,7 @@ void Terrain::init()
 
     glGenTextures(1, &m_textureID);
     glBindTexture(GL_TEXTURE_2D, m_textureID);
-    QImage image(":/images/grass.jpg");
+    QImage image(":/images/cobblestone.png");
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, image.bits());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

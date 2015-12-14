@@ -27,7 +27,8 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_textureId(0),
     m_statueShaderProgramID(0),
     m_angleX(0), m_angleY(0.5f), m_zoom(10.f),m_numManagers(0),
-    m_terrainProgramID(0),m_skyBoxTex(0)
+    m_terrainProgramID(0),m_skyBoxTex(0),
+    m_useTerrainTex(true), m_terrainNoTexProgramID(0)
 {
     //initializeGL();
     // View needs all mouse move events, not just mouse drag events
@@ -97,13 +98,9 @@ void View::initializeGL()
     initializeSkyBoxGL();
 
     m_terrainProgramID = ResourceLoader::createShaderProgram(":/shaders/terrain.vert", ":/shaders/terrain.frag");
-    m_terrain.init();
+    m_terrainNoTexProgramID = ResourceLoader::createShaderProgram(":/shaders/terrainNoTex.vert", ":/shaders/terrainNoTex.frag");
 
-    std::cout<<m_terrain.getHeight(-20, -20)<<std::endl;
-    std::cout<<m_terrain.getHeight(-20, 20)<<std::endl;
-    std::cout<<m_terrain.getHeight(20, -20)<<std::endl;
-    std::cout<<m_terrain.getHeight(20, 20)<<std::endl;
-    std::cout<<m_terrain.getHeight(0, 0)<<std::endl;
+    m_terrain.init();
 
     initStatue();
 
@@ -163,6 +160,10 @@ void View::mouseReleaseEvent(QMouseEvent *event)
 void View::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape) QApplication::quit();
+
+    if(event->key() == Qt::Key_1) m_useTerrainTex = true;
+
+    if(event->key() == Qt::Key_2) m_useTerrainTex = false;
 
     // TODO: Handle keyboard presses here
 }
@@ -231,11 +232,18 @@ void View::squareData(float scale){
 void View::drawTerrain() {
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_CULL_FACE);
-    glUseProgram(m_terrainProgramID);
+    GLuint shaderID;
+    if(m_useTerrainTex)
+    {
+        shaderID = m_terrainProgramID;
+    }else{
+        shaderID = m_terrainNoTexProgramID;
+    }
 
-    glUniformMatrix4fv(glGetUniformLocation(m_terrainProgramID, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
-    glUniformMatrix4fv(glGetUniformLocation(m_terrainProgramID, "view"), 1, GL_FALSE, glm::value_ptr(m_view));
-    glUniformMatrix4fv(glGetUniformLocation(m_terrainProgramID, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+    glUseProgram(shaderID);
+    glUniformMatrix4fv(glGetUniformLocation(shaderID, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
+    glUniformMatrix4fv(glGetUniformLocation(shaderID, "view"), 1, GL_FALSE, glm::value_ptr(m_view));
+    glUniformMatrix4fv(glGetUniformLocation(shaderID, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
 
     m_terrain.draw();
 
@@ -369,7 +377,7 @@ void View::createParticleManager(glm::vec3 initialpos, unsigned int maxp,float s
 
 void View::initStatue(){
     //whee different shader progs
-    ResourceLoader::initializeGlew();
+    //ResourceLoader::initializeGlew();
     m_statueShaderProgramID = ResourceLoader::createShaderProgram(":/shaders/statue.vert", ":/shaders/statue.frag");
 
     m_uniformLocs["p"]= glGetUniformLocation(m_statueShaderProgramID, "p");

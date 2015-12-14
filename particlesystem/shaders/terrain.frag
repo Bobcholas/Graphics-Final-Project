@@ -16,17 +16,12 @@ void main() {
     float b = (blending.x + blending.y + blending.z);
     blending /= vec3(b, b, b);
 
-    vec4 xaxis = texture( img, WS_position.yz *.05);
-    vec4 yaxis = texture( img, WS_position.xz *.05);
-    vec4 zaxis = texture( img, WS_position.xy *.05);
-
-    //vec4 xaxis = texture( img, vec2(0,0));
-    //vec4 yaxis = texture( img, vec2(0,0));
-    //vec4 zaxis = texture( img, vec2(0,0));
+    vec4 xaxis = texture( img, WS_position.yz*.35);
+    vec4 yaxis = texture( img, WS_position.xz*.35);
+    vec4 zaxis = texture( img, WS_position.xy*.35);
 
     vec4 tex = xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
 
     vec4 diff4 = vec4(diff, 0);
     fragColor = diff4*.2 + .7*tex;
-    //fragColor = vec4(1,0,0,1);
 }

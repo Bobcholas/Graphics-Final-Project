@@ -75,6 +75,7 @@ private:
 
     GLuint m_textureProgramID;//texture mapping particle shader
     GLuint m_terrainProgramID;
+    GLuint m_terrainNoTexProgramID;
 
     GLuint m_textureId;//texture mapping program
 
@@ -104,6 +105,7 @@ private:
     void paintSkyBoxGL();
     GLuint m_skyBoxTex;
     GLuint* m_pmtex;
+    bool m_useTerrainTex;
 
 private slots:
     void tick();
