@@ -3,14 +3,13 @@
 #include <iostream>
 
 Shape::Shape(int t1, int t2, int t3)
-    :m_t1(t1), m_t2(t2), m_t3(t3)
+    :m_t1(t1), m_t2(t2), m_t3(t3), m_vaoID(0), m_vboID(0)
 {
 }
 
 Shape::~Shape(){
-    std::cout << "deleting shape, nothing done" << std::endl;
-
-
+    glDeleteVertexArrays(1, &m_vaoID);
+    glGenBuffers(1, &m_vboID);
 }
 
 void Shape::init(){
