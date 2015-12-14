@@ -132,8 +132,8 @@ void Statue::addHead(glm::vec4 point, glm::vec4 up){
     size *= 1.2;
     tp.trans = m_anchor * rotateTo(glm::vec4(0, 1, 0, 0), up) *
             glm::translate(glm::vec3(point)) *
-            glm::scale(glm::vec3(size*.75, size, size*.8)) *
-            glm::translate(glm::vec3(0, 1.15, 0));
+            glm::scale(glm::vec3(size, size*1.2, size)) *
+            glm::translate(glm::vec3(0, (tp.primitive.type == PRIMITIVE_SPHERE ? .8 : 1), 0));
     tp.primitive.material = randMaterial();
     tp.primitive.type = PRIMITIVE_CONE;
     objects.push_back(tp);
