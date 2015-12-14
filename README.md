@@ -51,5 +51,6 @@ The process itself attempts to keep limbs roughly within a plane; this mimics re
 
 
 Bugs:
+Something that isn't a bug but looks like one is wizard feet. They poke slightly into the ground because the terrain isn't flat- and hovering wizards look much sillier than wizards with feet melding with the ground, especially since you can't really tell it's happening unless you're looking from below.
 
 Particle system color settings may not have an effect. They primarily use textures. 
